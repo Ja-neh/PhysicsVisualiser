@@ -20,7 +20,7 @@ public class FlatSurface : Scenario
         box = new Box();
         AppliedForce = 0.0;
         FrictionCoefficient = 0.0;
-        Gravity = 9.8;
+        Gravity = Constants.earthGravitationalAcceleration;
         _accumulatedTime = 0.0;
     }
 
