@@ -1,0 +1,7 @@
+<Solution>
+  <Project Path="ConsoleTests/ConsoleTests.csproj" Id="e227c074-4a02-4a66-94a5-7ec5f9cb016f" />
+  <Project Path="PhysicsEngine/PhysicsEngine.csproj" />
+  <Project Path="PhysicsVisualiser/PhysicsVisualiser.csproj">
+    <Deploy Solution="Debug|*" />
+  </Project>
+</Solution>
