@@ -1,5 +1,7 @@
 ﻿using System;
 using PhysicsEngine.Bodies;
+using PhysicsEngine.Formulas;
+using PhysicsEngine.Quantities;
 
 namespace PhysicsEngine.Scenarios;
 
@@ -8,46 +10,103 @@ public class FlatSurface : Scenario
 {
     public Box box;
 
+    public double Mass { get; set; }
+    public double InitialVelocity { get; set; }
     public double AppliedForce { get; set; }
+    public double AppliedForceAngle { get; set; }
+    public double SurfaceInclination { get; set; }
     public double FrictionCoefficient { get; set; }
     public double Gravity { get; set; }
 
+    // FIELDS
     private double _accumulatedTime;
+    private Force AppliedForceX = new Force(0, DirectionXY.Xpositive);
+    private Force AppliedForceY = new Force(0, DirectionXY.Ypositive);
 
 
     public FlatSurface()
     {
         box = new Box();
-        AppliedForce = 0.0;
-        FrictionCoefficient = 0.0;
         Gravity = Constants.earthGravitationalAcceleration;
+
         _accumulatedTime = 0.0;
     }
+
+
+    public void Initialize()
+    {
+        if (Mass != 0.0)
+        {
+            box.Mass = this.Mass;
+        }
+        if (InitialVelocity != 0.0)
+        {
+            box.VelocityX = InitialVelocity;
+        }
+
+        AppliedForceX.Magnitude = Forces.ForceAdjacent(AppliedForce, Math.Abs(AppliedForceAngle));
+        if(AppliedForce < 0)
+        {
+            AppliedForceX.Direction = DirectionXY.Xnegative;
+        }
+
+        AppliedForceY.Magnitude = Forces.ForceOpposite(AppliedForce, Math.Abs(AppliedForceAngle));
+        if(AppliedForceAngle < 0)
+        {
+            AppliedForceY.Direction = DirectionXY.Ynegative;
+        }
+    }
+
 
     public override void Update(double delta)
     {
         _accumulatedTime += delta;
 
-        box.WeightY = box.Mass * Gravity;
-        box.Normal = box.WeightY;
+        box.WeightX.Magnitude = Forces.WeightParallel(box.Mass, SurfaceInclination);
+        box.WeightY.Magnitude = Forces.WeightPerpendicular(box.Mass, SurfaceInclination);
+        box.Normal.Magnitude = box.WeightY.SignedMagnitude + AppliedForceY.SignedMagnitude;
 
-        double friction = FrictionCoefficient * box.Normal;
-        double fnet = AppliedForce - friction;
 
-        box.AccelerationX = fnet / box.Mass;
+        Force friction = new Force(0, DirectionXY.Xpositive);
+        friction.Magnitude = Forces.Friction(FrictionCoefficient, box.Normal.Magnitude);
+        if(AppliedForceX.Direction == DirectionXY.Xpositive)
+        {
+            friction.Direction = DirectionXY.Xnegative;
+        }
+
+        Force fNetX = new Force(0, DirectionXY.Xpositive);
+        double tempMagnitude = AppliedForceX.SignedMagnitude + box.WeightX.SignedMagnitude + friction.SignedMagnitude;
+        if(tempMagnitude < 0)
+        {
+            fNetX.Direction = DirectionXY.Xnegative;
+        }
+        fNetX.Magnitude = tempMagnitude;
+
+        Force fNetY = new Force(0, DirectionXY.Ypositive);
+        tempMagnitude = AppliedForceY.SignedMagnitude + box.WeightY.SignedMagnitude + box.Normal.SignedMagnitude;
+        if (tempMagnitude < 0)
+        {
+            fNetY.Direction = DirectionXY.Ynegative;
+        }
+        fNetY.Magnitude = tempMagnitude;
+
+        box.AccelerationX = fNetX.SignedMagnitude / box.Mass;
+        box.AccelerationY = fNetY.SignedMagnitude / box.Mass;
 
         box.PositionX = box.InitialVelocityX * _accumulatedTime + 0.5 * box.AccelerationX * Math.Pow(_accumulatedTime , 2);
 
         box.VelocityX = box.InitialVelocityX + box.AccelerationX * _accumulatedTime;
 
 
-        Console.WriteLine("Weight : " + box.WeightY);
-        Console.WriteLine("Normal : " + box.Normal);
+        Console.WriteLine("WeightX : " + box.WeightX.SignedMagnitude);
+        Console.WriteLine("WeightY : " + box.WeightY.SignedMagnitude);
+        Console.WriteLine("Normal : " + box.Normal.SignedMagnitude);
         Console.WriteLine("Position : " + box.PositionX);
         Console.WriteLine("Velocity : " + box.VelocityX);
         Console.WriteLine("Acceleration : " + box.AccelerationX);
-        Console.WriteLine("Friction : " + friction);
-        Console.WriteLine("Fnet : " + fnet);
+        Console.WriteLine("Friction : " + friction.SignedMagnitude);
+        Console.WriteLine("FnetX : " + fNetX.SignedMagnitude);
+        Console.WriteLine("FnetY : " + fNetY.SignedMagnitude);
         Console.WriteLine("--------------------------------------------------------");
     }
 

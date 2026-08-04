@@ -18,6 +18,9 @@ class Program
 
         double TotalTime = 2;
         double delta = 0.2;
+
+        scenario.Initialize();
+
         for (double i = 0; i < TotalTime; i = i + delta)
         {
             scenario.Update(delta);

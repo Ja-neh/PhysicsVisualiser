@@ -1,4 +1,6 @@
-﻿namespace PhysicsEngine.Bodies;
+﻿using PhysicsEngine.Quantities;
+
+namespace PhysicsEngine.Bodies;
 
 
 public abstract class PhysicsBody
@@ -12,9 +14,9 @@ public abstract class PhysicsBody
     public double AccelerationX { get; set; }
     public double AccelerationY { get; set; }
 
-    public double WeightX { get; set; }
-    public double WeightY { get; set; }
-    public double Normal { get; set; }
+    public Force WeightX { get; set; }
+    public Force WeightY { get; set; }
+    public Force Normal { get; set; }
 
     public PhysicsBody()
     {
@@ -22,5 +24,8 @@ public abstract class PhysicsBody
         PositionX = PositionY = 0.0;
         VelocityX = VelocityY = 0.0;
         AccelerationX = AccelerationY = 0.0;
+        WeightX = new Force(0, DirectionXY.Xnegative);
+        WeightY = new Force(0, DirectionXY.Ynegative);
+        Normal = new Force(0, DirectionXY.Ypositive);
     }
 }
