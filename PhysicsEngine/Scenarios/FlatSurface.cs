@@ -33,7 +33,7 @@ public class FlatSurface : Scenario
     }
 
 
-    public void Initialize()
+    public override void Initialize()
     {
         if (Mass != 0.0)
         {
