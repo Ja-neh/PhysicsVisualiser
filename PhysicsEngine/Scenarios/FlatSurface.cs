@@ -11,7 +11,7 @@ public class FlatSurface : Scenario
     public Box box;
 
     public double Mass { get; set; }
-    public double InitialVelocity { get; set; }
+    public double InitialVelocityX { get; set; }
     public double AppliedForce { get; set; }
     public double AppliedForceAngle { get; set; }
     public double SurfaceInclination { get; set; }
@@ -39,9 +39,9 @@ public class FlatSurface : Scenario
         {
             box.Mass = this.Mass;
         }
-        if (InitialVelocity != 0.0)
+        if (InitialVelocityX != 0.0)
         {
-            box.VelocityX = InitialVelocity;
+            box.InitialVelocityX = this.InitialVelocityX;
         }
 
         AppliedForceX.Magnitude = Forces.ForceAdjacent(AppliedForce, Math.Abs(AppliedForceAngle));
@@ -62,11 +62,12 @@ public class FlatSurface : Scenario
     {
         _accumulatedTime += delta;
 
+        // weight & normal
         box.WeightX.Magnitude = Forces.WeightParallel(box.Mass, SurfaceInclination);
         box.WeightY.Magnitude = Forces.WeightPerpendicular(box.Mass, SurfaceInclination);
         box.Normal.Magnitude = box.WeightY.SignedMagnitude + AppliedForceY.SignedMagnitude;
 
-
+        // friction
         Force friction = new Force(0, DirectionXY.Xpositive);
         friction.Magnitude = Forces.Friction(FrictionCoefficient, box.Normal.Magnitude);
         if(AppliedForceX.Direction == DirectionXY.Xpositive)
@@ -74,6 +75,7 @@ public class FlatSurface : Scenario
             friction.Direction = DirectionXY.Xnegative;
         }
 
+        // fnet
         Force fNetX = new Force(0, DirectionXY.Xpositive);
         double tempMagnitude = AppliedForceX.SignedMagnitude + box.WeightX.SignedMagnitude + friction.SignedMagnitude;
         if(tempMagnitude < 0)
@@ -90,6 +92,7 @@ public class FlatSurface : Scenario
         }
         fNetY.Magnitude = tempMagnitude;
 
+        // x, v, a
         box.AccelerationX = fNetX.SignedMagnitude / box.Mass;
         box.AccelerationY = fNetY.SignedMagnitude / box.Mass;
 
