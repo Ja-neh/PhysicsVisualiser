@@ -2,34 +2,49 @@
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Windows.Input;
+using CommunityToolkit.Mvvm.ComponentModel;
 using PhysicsEngine;
 using PhysicsEngine.Bodies;
 using PhysicsEngine.Scenarios;
 
 namespace PhysicsVisualiser.ViewModels;
 
-public class FlatSurfaceViewModel : INotifyPropertyChanged
+public partial class FlatSurfaceViewModel : ObservableObject
 {
-    public event PropertyChangedEventHandler? PropertyChanged;
     private Director _director;
 
     // Physics default values
-    private double _mass = 5.0;
-    private double _initialVelocityX = 0.0;
-    private double _appliedForce = 0.0;
-    private double _appliedForceAngle = 0.0;
-    private double _frictionCoefficient = 0.25;
-    private double _gravity = Constants.earthGravitationalAcceleration;
+    [ObservableProperty]
+    public partial double Mass {  get; set; }
+    [ObservableProperty]
+    public partial double InitialVelocityX {  get; set; }
+    [ObservableProperty]
+    public partial double AppliedForce {  get; set; }
+    [ObservableProperty]
+    public partial double AppliedForceAngle {  get; set; }
+    [ObservableProperty]
+    public partial double FrictionCoefficient {  get; set; }
+    [ObservableProperty]
+    public partial double Gravity{ get; set; }
+
 
     // Runtime values to keep track of
-    private double _currentTime = 0.0;
-    private double _currentPositionX = 0.0;
-    private double _currentVelocityX = 0.0;
-    private double _currentAccelerationX = 0.0;
-    private double _currentNormalForce = 0.0;
-    private double _currentFrictionForce = 0.0;
-    private double _currentWeightY = 0.0;
-    private double _currentNetForceX = 0.0;
+    [ObservableProperty]
+    public partial double CurrentTime { get; set; }
+    [ObservableProperty]
+    public partial double CurrentPositionX { get; set; }
+    [ObservableProperty]
+    public partial double CurrentVelocityX { get; set; }
+    [ObservableProperty]
+    public partial double CurrentAccelerationX { get; set; }
+    [ObservableProperty]
+    public partial double CurrentNormalForce { get; set; }
+    [ObservableProperty]
+    public partial double CurrentFrictionForce { get; set; }
+    [ObservableProperty]
+    public partial double CurrentWeightY { get; set; }
+    [ObservableProperty]
+    public partial double CurrentNetForceX { get; set; }
 
     // simulation
     private bool CanPay;
@@ -48,147 +63,6 @@ public class FlatSurfaceViewModel : INotifyPropertyChanged
 
     }
 
-    #region INPUT PROPERTIES
-    public double Mass
-    {
-        get => _mass;
-        set
-        {
-            SetField(ref _mass, value);
-        }
-    }
+    
 
-    public double InitialVelocityX
-    {
-        get => _initialVelocityX;
-        set
-        {
-            SetField(ref _initialVelocityX, value);
-        }
-    }
-
-    public double AppliedForce
-    {
-        get => _appliedForce;
-        set
-        {
-            SetField(ref _appliedForce, value);
-        }
-    }
-
-    public double AppliedForceAngle
-    {
-        get => _appliedForceAngle;
-        set
-        {
-            SetField(ref _appliedForceAngle, value);
-        }
-    }
-
-    public double FrictionCoefficient
-    {
-        get => _frictionCoefficient;
-        set
-        {
-            SetField(ref _frictionCoefficient, value);
-        }
-    }
-    public double Gravity
-    {
-        get => _gravity;
-        set
-        {
-            SetField(ref _gravity, value);
-        }
-    }
-    #endregion
-
-
-    #region RUNTIME UPDATING PROPERTIES
-    public double CurrentTime
-    {
-        get => _currentTime;
-        set
-        {
-            SetField(ref _currentTime, value);
-        }
-    }
-
-    public double CurrentPositionX
-    {
-        get => _currentPositionX;
-        set
-        {
-            SetField(ref _currentPositionX, value);
-        }
-    }
-
-    public double CurrentVelocityX
-    {
-        get => _currentVelocityX;
-        set
-        {
-            SetField(ref _currentVelocityX, value);
-        }
-    }
-
-    public double CurrentAccelerationX
-    {
-        get => _currentAccelerationX;
-        set
-        {
-            SetField(ref _currentAccelerationX, value);
-        }
-    }
-
-    public double CurrentNormalForce
-    {
-        get => _currentNormalForce;
-        set
-        {
-            SetField(ref _currentNormalForce, value);
-        }
-    }
-
-    public double CurrentFrictionForce
-    {
-        get => _currentFrictionForce;
-        set
-        {
-            SetField(ref _currentFrictionForce, value);
-        }
-    }
-
-    public double CurrentWeightY
-    {
-        get => _currentWeightY;
-        set
-        {
-            SetField(ref _currentWeightY, value);
-        }
-    }
-
-    public double CurrentNetForceX
-    {
-        get => _currentNetForceX;
-        set
-        {
-            SetField(ref _currentNetForceX, value);
-        }
-    }
-    #endregion
-
-
-    // Helpers
-    private void SetField<T>(ref T field, T value, [CallerMemberName] string? propertyName = null)
-    {
-        if (EqualityComparer<T>.Default.Equals(field, value)) return;
-        field = value;
-        OnPropertyChanged(propertyName);
-    }
-
-    private void OnPropertyChanged([CallerMemberName] string? propertyName = null)
-    {
-        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-    }
 }
