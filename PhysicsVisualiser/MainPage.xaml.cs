@@ -1,24 +1,59 @@
-﻿namespace PhysicsVisualiser
+﻿using PhysicsVisualiser.ViewModels;
+
+#if ANDROID
+using Android.Content.PM;
+#endif
+
+namespace PhysicsVisualiser;
+
+public partial class MainPage : ContentPage
 {
-    public partial class MainPage : ContentPage
+
+#if ANDROID
+    private ScreenOrientation? _originalOrientation;
+#endif
+
+
+    public MainPage()
     {
-        int count = 0;
+        InitializeComponent();
+    }
 
-        public MainPage()
+
+    protected override void OnAppearing()
+    {
+        base.OnAppearing();
+
+        LockOrientation();
+    }
+
+    protected override void OnDisappearing()
+    {
+        base.OnDisappearing();
+
+        UnlockOrientation();
+    }
+
+    private void LockOrientation()
+    {
+#if ANDROID
+        if (Platform.CurrentActivity is not null)
         {
-            InitializeComponent();
+            _originalOrientation = Platform.CurrentActivity.RequestedOrientation;
+            Platform.CurrentActivity.RequestedOrientation = ScreenOrientation.Landscape;
         }
+#endif
 
-        private void OnCounterClicked(object? sender, EventArgs e)
+    }
+
+    private void UnlockOrientation()
+    {
+#if ANDROID
+        if (Platform.CurrentActivity is not null && _originalOrientation.HasValue)
         {
-            count++;
-
-            if (count == 1)
-                CounterBtn.Text = $"Clicked {count} time";
-            else
-                CounterBtn.Text = $"Clicked {count} times";
-
-            SemanticScreenReader.Announce(CounterBtn.Text);
+            Platform.CurrentActivity.RequestedOrientation = _originalOrientation.Value;
         }
+#endif
+
     }
 }
