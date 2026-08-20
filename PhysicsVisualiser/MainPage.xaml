@@ -201,18 +201,6 @@
                         </Border>
                     </Grid>
 
-                    <!-- Surface Inclination -->
-                    <Grid Grid.Row="5" ColumnDefinitions="*, Auto, Auto" ColumnSpacing="10">
-                        <Label Grid.Column="0" Text="Surface Inclination" TextColor="Black" FontAttributes="Bold" VerticalTextAlignment="Center" />
-                        <Entry Grid.Column="1" Keyboard="Numeric" 
-                               Text="{Binding SurfaceInclination, StringFormat='{0:F3}'}" HeightRequest="40" WidthRequest="100" 
-                                BackgroundColor="White" TextColor="Black"  />
-                        <Border Grid.Column="2" StrokeShape="RoundRectangle 4" BackgroundColor="Black" Padding="0">
-                            <Label Text="°" TextColor="White" HeightRequest="40" WidthRequest="45" 
-                           HorizontalTextAlignment="Center" VerticalTextAlignment="Center" />
-                        </Border>
-                    </Grid>
-
                     <!-- Friction Coefficient -->
                     <Grid Grid.Row="6" ColumnDefinitions="*, Auto, Auto" ColumnSpacing="10">
                         <Label Grid.Column="0" Text="Friction Coefficient" TextColor="Black" FontAttributes="Bold" VerticalTextAlignment="Center" />
