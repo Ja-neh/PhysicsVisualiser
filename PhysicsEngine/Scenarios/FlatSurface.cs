@@ -58,6 +58,12 @@ public class FlatSurface : Scenario
     }
 
 
+    public void ResetAccumulatedTime()
+    {
+        _accumulatedTime = 0.0;
+    }
+
+
     public override void Update(double delta)
     {
         _accumulatedTime += delta;
@@ -69,8 +75,12 @@ public class FlatSurface : Scenario
 
         // friction
         Force friction = new Force(0, DirectionXY.Xpositive);
-        friction.Magnitude = Forces.Friction(FrictionCoefficient, box.Normal.Magnitude);
-        if(AppliedForceX.Direction == DirectionXY.Xpositive)
+        friction.Magnitude = Forces.Friction(FrictionCoefficient, box.Normal.Magnitude);  
+        if (box.VelocityX < 0)
+        {
+            friction.Direction = DirectionXY.Xpositive;
+        }
+        else
         {
             friction.Direction = DirectionXY.Xnegative;
         }
@@ -82,7 +92,7 @@ public class FlatSurface : Scenario
         {
             fNetX.Direction = DirectionXY.Xnegative;
         }
-        fNetX.Magnitude = tempMagnitude;
+        fNetX.Magnitude = Math.Abs(tempMagnitude);
 
         Force fNetY = new Force(0, DirectionXY.Ypositive);
         tempMagnitude = AppliedForceY.SignedMagnitude + box.WeightY.SignedMagnitude + box.Normal.SignedMagnitude;
@@ -90,7 +100,7 @@ public class FlatSurface : Scenario
         {
             fNetY.Direction = DirectionXY.Ynegative;
         }
-        fNetY.Magnitude = tempMagnitude;
+        fNetY.Magnitude = Math.Abs(tempMagnitude);
 
         // x, v, a
         box.AccelerationX = fNetX.SignedMagnitude / box.Mass;

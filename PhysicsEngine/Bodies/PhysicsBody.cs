@@ -20,7 +20,7 @@ public abstract class PhysicsBody
 
     public PhysicsBody()
     {
-        Mass = 5.0;
+        Mass = 0.0;
         PositionX = PositionY = 0.0;
         VelocityX = VelocityY = 0.0;
         AccelerationX = AccelerationY = 0.0;

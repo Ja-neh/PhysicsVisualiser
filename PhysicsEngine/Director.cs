@@ -5,12 +5,22 @@ namespace PhysicsEngine;
 
 public class Director
 {
-    private Scenario _scenario;
+    public Scenario Scene { get; set; }
 
     public Director(Scenario scenario)
     {
-        _scenario = scenario;
-        _scenario.Initialize();
+        Scene = scenario;
+        Scene.Initialize();
     }
 
+    public void Step(double deltaTime)
+    {
+        Scene.Update(deltaTime);
+    }
+
+    public void SetScenario(Scenario scenario)
+    {
+        Scene = scenario;
+        Scene.Initialize();
+    }
 }
