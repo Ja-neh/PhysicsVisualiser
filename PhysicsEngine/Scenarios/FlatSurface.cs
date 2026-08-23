@@ -8,75 +8,143 @@ namespace PhysicsEngine.Scenarios;
 
 public class FlatSurface : Scenario
 {
-    public Box box;
+    private readonly Box box = new Box();
 
-    public double Mass { get; set; }
-    public double InitialVelocityX { get; set; }
+    #region PROPERTIES
+    public double CurrentTime { get; set; }
+
+    public double Mass
+    {
+        get => box.Mass;
+        set
+        {
+            box.Mass = value;
+        }
+    }
+
+    public double InitialVelocity
+    {
+        get => box.InitialVelocityX;
+        set
+        {
+            box.InitialVelocityX = value;
+        }
+    }
+
+    public double Position
+    {
+        get => box.PositionX;
+        set
+        {
+            box.PositionX = value;
+        }
+    }
+
+    public double Velocity
+    {
+        get => box.VelocityX;
+        set
+        {
+            box.VelocityX = value;
+        }        
+    }
+
+    public double Acceleration
+    {
+        get => box.AccelerationX;
+        set
+        {
+            box.AccelerationX = value;
+        }
+    }
+
+    public double Weight
+    {
+        get => box.WeightX.SignedMagnitude;
+        set
+        {
+            box.WeightX.Magnitude = value;
+        }
+    }
+
+    public double Normal
+    {
+        get => box.Normal.SignedMagnitude;
+        set
+        {
+            box.Normal.Magnitude = value;
+        }
+    }
+
     public double AppliedForce { get; set; }
     public double AppliedForceAngle { get; set; }
+
     public double SurfaceInclination { get; set; }
     public double FrictionCoefficient { get; set; }
-    public double Gravity { get; set; }
+    public double Gravity { get; set; } = Constants.earthGravitationalAcceleration;
+    #endregion
 
     // FIELDS
-    private double _accumulatedTime;
-    private Force AppliedForceX = new Force(0, DirectionXY.Xpositive);
-    private Force AppliedForceY = new Force(0, DirectionXY.Ypositive);
+    private readonly Force _appliedForceX = new Force(0, DirectionXY.Xpositive);
+    private readonly Force _appliedForceY = new Force(0, DirectionXY.Ypositive);
 
 
-    public FlatSurface()
+    public FlatSurface() {}
+
+
+    public override void Initialize()   // To components 
     {
-        box = new Box();
-        Gravity = Constants.earthGravitationalAcceleration;
+        _appliedForceX.Magnitude = Forces.ForceAdjacent(AppliedForce, AppliedForceAngle);
+        _appliedForceY.Magnitude = Forces.ForceOpposite(AppliedForce, AppliedForceAngle);
 
-        _accumulatedTime = 0.0;
-    }
-
-
-    public override void Initialize()
-    {
-        if (Mass != 0.0)
-        {
-            box.Mass = this.Mass;
-        }
-        if (InitialVelocityX != 0.0)
-        {
-            box.InitialVelocityX = this.InitialVelocityX;
-        }
-
-        AppliedForceX.Magnitude = Forces.ForceAdjacent(AppliedForce, Math.Abs(AppliedForceAngle));
+        _appliedForceX.Magnitude = Forces.ForceAdjacent(AppliedForce, Math.Abs(AppliedForceAngle));
         if(AppliedForce < 0)
         {
-            AppliedForceX.Direction = DirectionXY.Xnegative;
+            _appliedForceX.Direction = DirectionXY.Xnegative;
         }
 
-        AppliedForceY.Magnitude = Forces.ForceOpposite(AppliedForce, Math.Abs(AppliedForceAngle));
+        _appliedForceY.Magnitude = Forces.ForceOpposite(AppliedForce, Math.Abs(AppliedForceAngle));
         if(AppliedForceAngle < 0)
         {
-            AppliedForceY.Direction = DirectionXY.Ynegative;
+            _appliedForceY.Direction = DirectionXY.Ynegative;
         }
     }
 
-
-    public void ResetAccumulatedTime()
+    public void Restart()
     {
-        _accumulatedTime = 0.0;
+        CurrentTime = default;
+        Position = 0.0;
+        Velocity = 0.0;
+        Acceleration = 0.0;
+    }
+
+    public void Reset()
+    {
+        CurrentTime = default;
+        Mass = 0.0;
+        InitialVelocity = 0.0;
+        Position = 0.0;
+        Velocity = 0.0;
+        Acceleration = 0.0;
+        Weight = 0.0;
+        Normal = 0.0;
     }
 
 
-    public override void Update(double delta)
-    {
-        _accumulatedTime += delta;
+    public override void Update(double delta)   // using TotalTime instead of small deltas in calculations
+    {                                               // to avoid double inaccuracy
+        if (CurrentTime == default) Initialize();
+
+        CurrentTime += delta;
 
         // weight & normal
-        box.WeightX.Magnitude = Forces.WeightParallel(box.Mass, SurfaceInclination);
-        box.WeightY.Magnitude = Forces.WeightPerpendicular(box.Mass, SurfaceInclination);
-        box.Normal.Magnitude = box.WeightY.SignedMagnitude + AppliedForceY.SignedMagnitude;
+        Weight = Forces.WeightPerpendicular(Mass, SurfaceInclination);
+        Normal = Weight + _appliedForceY.SignedMagnitude;
 
         // friction
         Force friction = new Force(0, DirectionXY.Xpositive);
-        friction.Magnitude = Forces.Friction(FrictionCoefficient, box.Normal.Magnitude);  
-        if (box.VelocityX < 0)
+        friction.Magnitude = Forces.Friction(FrictionCoefficient, Normal);  
+        if (Velocity < 0)
         {
             friction.Direction = DirectionXY.Xpositive;
         }
@@ -87,7 +155,7 @@ public class FlatSurface : Scenario
 
         // fnet
         Force fNetX = new Force(0, DirectionXY.Xpositive);
-        double tempMagnitude = AppliedForceX.SignedMagnitude + box.WeightX.SignedMagnitude + friction.SignedMagnitude;
+        double tempMagnitude = _appliedForceX.SignedMagnitude + friction.SignedMagnitude;
         if(tempMagnitude < 0)
         {
             fNetX.Direction = DirectionXY.Xnegative;
@@ -95,7 +163,7 @@ public class FlatSurface : Scenario
         fNetX.Magnitude = Math.Abs(tempMagnitude);
 
         Force fNetY = new Force(0, DirectionXY.Ypositive);
-        tempMagnitude = AppliedForceY.SignedMagnitude + box.WeightY.SignedMagnitude + box.Normal.SignedMagnitude;
+        tempMagnitude = _appliedForceY.SignedMagnitude + Weight + Normal;
         if (tempMagnitude < 0)
         {
             fNetY.Direction = DirectionXY.Ynegative;
@@ -103,12 +171,11 @@ public class FlatSurface : Scenario
         fNetY.Magnitude = Math.Abs(tempMagnitude);
 
         // x, v, a
-        box.AccelerationX = fNetX.SignedMagnitude / box.Mass;
-        box.AccelerationY = fNetY.SignedMagnitude / box.Mass;
+        Acceleration = fNetX.SignedMagnitude / Mass;
 
-        box.PositionX = box.InitialVelocityX * _accumulatedTime + 0.5 * box.AccelerationX * Math.Pow(_accumulatedTime , 2);
+        Position = Motion.DisplacementUsingAcceleration(InitialVelocity, CurrentTime, Acceleration);
 
-        box.VelocityX = box.InitialVelocityX + box.AccelerationX * _accumulatedTime;
+        Velocity = Motion.FinalVelocity(InitialVelocity, Acceleration, CurrentTime);
 
 
         Console.WriteLine("WeightX : " + box.WeightX.SignedMagnitude);

@@ -1,7 +1,7 @@
 ﻿namespace PhysicsEngine.Quantities;
 
 
-public enum DirectionXY
+internal enum DirectionXY
 {
     Xpositive,
     Xnegative,
@@ -9,14 +9,14 @@ public enum DirectionXY
     Ynegative
 }
 
-public class Force
+internal class Force
 {
     public DirectionXY Direction { get; set; }
 
     private double _magnitude;
     public double Magnitude
     {
-        get { return _magnitude; }
+        get => _magnitude;
         set { _magnitude = Math.Abs(value); }
     }
 

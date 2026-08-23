@@ -5,23 +5,23 @@ namespace PhysicsEngine.Formulas;
 
 public static class Motion
 {
-    public static double FinalVelocity(double iVelocity, double acceleration, double deltaTime)
+    public static double FinalVelocity(double initialVelocity, double acceleration, double deltaTime)
     {
-        return iVelocity + acceleration * deltaTime;
+        return initialVelocity + acceleration * deltaTime;
     }
 
-    public static double FinalVelocitySqured(double iVelocity, double acceleration, double displacement)
+    public static double FinalVelocitySqured(double initialVelocity, double acceleration, double displacement)
     {
-        return Math.Pow(iVelocity, 2) + 2 * acceleration * displacement;
+        return Math.Pow(initialVelocity, 2) + 2 * acceleration * displacement;
     }
 
-    public static double DisplacementUsingAcceleration(double iVelocity, double deltaTime, double acceleration)
+    public static double DisplacementUsingAcceleration(double initialVelocity, double deltaTime, double acceleration)
     {
-        return iVelocity * deltaTime + 0.5 * acceleration * Math.Pow(deltaTime, 2);
+        return initialVelocity * deltaTime + 0.5 * acceleration * Math.Pow(deltaTime, 2);
     }
 
-    public static double DisplacementUsingFinalVelocity(double iVelocity, double fVelocity, double deltaTime)
+    public static double DisplacementUsingFinalVelocity(double initialVelocity, double fVelocity, double deltaTime)
     {
-        return 0.5 * (iVelocity + fVelocity) * deltaTime;
+        return 0.5 * (initialVelocity + fVelocity) * deltaTime;
     }
 }

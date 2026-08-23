@@ -14,45 +14,84 @@ namespace PhysicsVisualiser.ViewModels;
 
 public partial class FlatSurfaceViewModel : ObservableObject
 {
-    private Director? _director;
-    
+    private FlatSurface _flatScenario = new FlatSurface();
+
     private const double _fixedTimeStep = 1.0 / 60.0; // 60 fps
     private double _accumulatedTime = 0.0;
 
     // Input properties
     [ObservableProperty]
-    public partial double Mass {  get; set; }
+    public partial double UserMass { get; set; }
     [ObservableProperty]
-    public partial double InitialVelocityX {  get; set; }
+    public partial double UserInitialVelocity { get; set; }
     [ObservableProperty]
-    public partial double AppliedForce {  get; set; }
+    public partial double UserAppliedForce { get; set; }
     [ObservableProperty]
-    public partial double AppliedForceAngle {  get; set; }
+    public partial double UserAppliedForceAngle { get; set; }
     [ObservableProperty]
-    public partial double FrictionCoefficient {  get; set; }
+    public partial double UserFrictionCoefficient { get; set; }
     [ObservableProperty]
-    public partial double Gravity{ get; set; }
+    public partial double UserGravity { get; set; }
 
+    // UI time
+    [ObservableProperty]
+    public partial double SolverCurrentTime { get; set; }
 
     // Runtime updating properies
     [ObservableProperty]
-    public partial double CurrentTime { get; set; }
+    public partial double SolverCurrentPosition { get; set; }
     [ObservableProperty]
-    public partial double CurrentPositionX { get; set; }
+    public partial double SolverCurrentVelocity { get; set; }
     [ObservableProperty]
-    public partial double CurrentVelocityX { get; set; }
+    public partial double SolverCurrentAcceleration { get; set; }
     [ObservableProperty]
-    public partial double CurrentAccelerationX { get; set; }
+    public partial double SolverCurrentNormalForce { get; set; }
     [ObservableProperty]
-    public partial double CurrentNormalForce { get; set; }
+    public partial double SolverCurrentFrictionForce { get; set; }
     [ObservableProperty]
-    public partial double CurrentFrictionForce { get; set; }
+    public partial double SolverCurrentWeight { get; set; }
     [ObservableProperty]
-    public partial double CurrentWeightY { get; set; }
-    [ObservableProperty]
-    public partial double CurrentNetForceX { get; set; }
+    public partial double SolverCurrentNetForce { get; set; }
 
-    // simulation control
+    #region INPUT TO SOLVER
+    partial void OnUserMassChanged(double value)
+    {
+        _flatScenario.Mass = value;
+    }
+
+    partial void OnUserInitialVelocityChanged(double value)
+    {
+        _flatScenario.InitialVelocity = value;
+    }
+
+    partial void OnUserAppliedForceChanged(double value)
+    {
+        _flatScenario.AppliedForce = value;
+    }
+
+    partial void OnUserAppliedForceAngleChanged(double value)
+    {
+        _flatScenario.AppliedForceAngle = value;
+    }
+
+    partial void OnUserFrictionCoefficientChanged(double value)
+    {
+        _flatScenario.FrictionCoefficient = value;
+    }
+
+    // TO DO - uncomment later
+    // SOLVER CURRENTLY NOT SETUP FOR ANY GRAVITY
+    //partial void OnUserGravityChanged(double value)
+    //{
+    //    _flatScenario.Gravity = value;
+    //}
+
+    // TO DO
+    // "On<...>IsChanging methods" for "User... properties" to check if solver IsRunning
+    // if running, user be warned of sudden, "maybe" unexpected changes in current run
+    #endregion
+
+    #region SIMULATION CONTROL
     private IDispatcherTimer? _timer;
 
     [ObservableProperty]
@@ -62,16 +101,11 @@ public partial class FlatSurfaceViewModel : ObservableObject
 
     public bool CanPlay => !IsRunning;
     public bool CanPause => IsRunning;
-    public bool CanReset => true;
+    public bool CanRestart => true;
 
     [RelayCommand(CanExecute = nameof(CanPlay))]
     private void Play()
     {
-        if(CurrentTime == 0.0)
-        {
-            BuildScenario();
-        }
-
         IsRunning = true;
         if (_timer is null)
         {
@@ -86,114 +120,59 @@ public partial class FlatSurfaceViewModel : ObservableObject
     private void Pause()
     {
         IsRunning = false;
-        if(_timer is null)
+        if (_timer is null)
         {
             throw new InvalidOperationException("Pause called while timer is null"); // the button shouldn't even be enabled -- something is wrong if this is thrown
         }
         _timer.Stop();
     }
 
-    [RelayCommand(CanExecute = nameof(CanReset))]
-    private void Reset()
+    [RelayCommand(CanExecute = nameof(CanRestart))]
+    private void Restart()
     {
         IsRunning = false;
-        if( _timer is not null)
+        if (_timer is not null)
         {
             _timer.Stop();
         }
 
-        CurrentTime = 0.0;
-        ResetUpdates();
-        SyncViewAndSolver();
+        _flatScenario.Restart();
+        SyncViewWithSolver();
     }
-
+    #endregion
 
     private void OnTimerTick(object? sender, EventArgs e)
     {
-        if(_timer is null)
+        if (_timer is null)
         {
             throw new InvalidOperationException("timer ticked while null");
         }
 
         _accumulatedTime += _timer.Interval.TotalSeconds;
 
-        while(_accumulatedTime >= _fixedTimeStep)
+        while (_accumulatedTime >= _fixedTimeStep)
         {
-            _director!.Step(_fixedTimeStep);    // checked in Play() -- never set to null once initialised
-            CurrentTime += _fixedTimeStep;
+            _flatScenario.Update(_fixedTimeStep);    // checked in Play() -- never set to null once initialised
             _accumulatedTime -= _fixedTimeStep;
         }
 
-        SyncViewAndSolver();
+        SyncViewWithSolver();
     }
 
 
-    public FlatSurfaceViewModel()
+    public FlatSurfaceViewModel() { }
+
+    private void SyncViewWithSolver()
     {
-
+        SolverCurrentTime = _flatScenario.CurrentTime;
+        SolverCurrentPosition = _flatScenario.Position;
+        SolverCurrentVelocity = _flatScenario.Velocity;
+        SolverCurrentAcceleration = _flatScenario.Acceleration;
+        SolverCurrentNormalForce = _flatScenario.Normal;
+        SolverCurrentFrictionForce = Forces.Friction(UserFrictionCoefficient, SolverCurrentNormalForce);
+        SolverCurrentWeight = _flatScenario.Weight;
+        SolverCurrentNetForce = Forces.FNet(UserMass, SolverCurrentAcceleration);
     }
 
-    private void SyncViewAndSolver()
-    {
-        if (_director is null)
-        {
-            return;
-        }
-
-        FlatSurface scenario = (FlatSurface)_director.Scene;
-
-        CurrentPositionX = scenario.box.PositionX;
-        CurrentVelocityX = scenario.box.VelocityX;
-        CurrentAccelerationX = scenario.box.AccelerationX;
-        CurrentNormalForce = scenario.box.Normal.Magnitude;
-        CurrentFrictionForce = Forces.Friction(FrictionCoefficient, CurrentNormalForce);
-        CurrentWeightY = scenario.box.WeightY.Magnitude;
-        CurrentNetForceX = Forces.FNet(Mass, CurrentAccelerationX);
-    }
-
-    private void BuildScenario()
-    {
-        FlatSurface scenario = new FlatSurface
-        {
-            Mass = this.Mass,
-            InitialVelocityX = this.InitialVelocityX,
-            AppliedForce = this.AppliedForce,
-            AppliedForceAngle = this.AppliedForceAngle,
-            FrictionCoefficient = this.FrictionCoefficient,
-            Gravity = this.Gravity,
-        };
-
-        if(_director is null)
-        {
-            _director = new Director(scenario);
-        }
-        else
-        {
-            _director.SetScenario(scenario);
-        }
-    }
-
-    private void ResetUpdates()
-    {
-        CurrentTime = 0.0;
-        CurrentPositionX = 0.0;
-        CurrentVelocityX = 0.0;
-        CurrentAccelerationX = 0.0;
-        CurrentNormalForce = 0.0;
-        CurrentFrictionForce = 0.0;
-        CurrentWeightY = 0.0;
-        CurrentNetForceX = 0.0;
-
-        if(_director is not null)
-        {
-            FlatSurface scenario = (FlatSurface)_director.Scene;
-
-            scenario.ResetAccumulatedTime();
-            scenario.box.PositionX = CurrentPositionX;
-            scenario.box.VelocityX = CurrentVelocityX;
-            scenario.box.AccelerationX = CurrentAccelerationX;
-            scenario.box.Normal.Magnitude = CurrentNormalForce;
-            scenario.box.WeightY.Magnitude = CurrentWeightY;
-        }
-    }
 }
+

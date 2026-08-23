@@ -3,7 +3,7 @@
 namespace PhysicsEngine.Bodies;
 
 
-public abstract class PhysicsBody
+internal abstract class PhysicsBody
 {
     public double Mass { get; set; }
 
@@ -20,10 +20,6 @@ public abstract class PhysicsBody
 
     public PhysicsBody()
     {
-        Mass = 0.0;
-        PositionX = PositionY = 0.0;
-        VelocityX = VelocityY = 0.0;
-        AccelerationX = AccelerationY = 0.0;
         WeightX = new Force(0, DirectionXY.Xnegative);
         WeightY = new Force(0, DirectionXY.Ynegative);
         Normal = new Force(0, DirectionXY.Ypositive);

@@ -13,7 +13,8 @@ class Program
     {
         FlatSurface scenario = new FlatSurface();
 
-        scenario.AppliedForce = 5;
+        scenario.Mass = 3;
+        scenario.AppliedForce = 25;
         scenario.FrictionCoefficient = 0.2;
 
         double TotalTime = 2;

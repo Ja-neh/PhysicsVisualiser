@@ -1,28 +1,22 @@
 ﻿namespace PhysicsEngine.Bodies;
 
 
-public class Box : PhysicsBody
+internal class Box : PhysicsBody
 {
     private double _initialVelocityX;
     private double _initialVelocityY;
 
     public double InitialVelocityX 
     {
-        get { return _initialVelocityX; }
-        // update velocity when initial-velocity is changed
-        set { _initialVelocityX = VelocityX = value; }
+        get => _initialVelocityX;
+        set { _initialVelocityX = VelocityX = value; }  // update velocity when initial-velocity is changed
     }
     
     public double InitialVelocityY
     {
-        get { return _initialVelocityY; }
-        // update velocity when initial-velocity is changed
-        set { _initialVelocityY = VelocityY = value; }
+        get => _initialVelocityY;
+        set { _initialVelocityY = VelocityY = value; }  // update velocity when initial-velocity is changed
     }
 
-    public Box() : base()
-    {
-        InitialVelocityX = VelocityX;
-        InitialVelocityY = VelocityY;
-    }
+    public Box() : base() {}
 }
