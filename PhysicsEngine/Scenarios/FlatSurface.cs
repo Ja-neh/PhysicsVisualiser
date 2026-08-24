@@ -120,7 +120,7 @@ public class FlatSurface : Scenario
     private readonly Force _fNetX = new Force(0, DirectionXY.Xpositive);
     private readonly Force _fNetY = new Force(0, DirectionXY.Xpositive);
 
-    private double _previousVelocity = 0.0;
+    private double _previousVelocity;
 
 
     public FlatSurface() {}
@@ -176,26 +176,28 @@ public class FlatSurface : Scenario
         Normal = Weight + _appliedForceY.SignedMagnitude;
 
         // friction
-        _friction.Magnitude = Forces.Friction(FrictionCoefficient, Normal);  
-        if (_previousVelocity <= 0)  // might be incorrect for first update since velocity isn't yet updated
+        _friction.Magnitude = Forces.Friction(FrictionCoefficient, Normal); 
+        if (_appliedForceX.Magnitude <= _friction.Magnitude)
         {
-            _friction.Direction = DirectionXY.Xpositive;
+            Acceleration = 0.0;
+            Velocity = 0.0;
         }
         else
         {
-            _friction.Direction = DirectionXY.Xnegative;
+            _friction.Direction = _appliedForceX.Direction.Negate();
+            //if(_previousVelocity < 0.0001)
+            //{
+            //    Acceleration = 0.0;
+            //    Velocity = 0.0;
+            //}
         }
 
         // fnetX
-        double tempMagnitude = _appliedForceX.SignedMagnitude + _friction.SignedMagnitude;
-        if(tempMagnitude < 0)
-        {
-            _fNetX.Direction = DirectionXY.Xnegative;
-        }
-        _fNetX.Magnitude = Math.Abs(tempMagnitude);
+        _fNetX.Magnitude = _appliedForceX.SignedMagnitude + _friction.SignedMagnitude;
+        _fNetX.Direction = _appliedForceX.Direction;
 
         // fnetY
-        tempMagnitude = _appliedForceY.SignedMagnitude + Weight + Normal;
+        double tempMagnitude = _appliedForceY.SignedMagnitude + Weight + Normal;
         if (tempMagnitude < 0)
         {
             _fNetY.Direction = DirectionXY.Ynegative;

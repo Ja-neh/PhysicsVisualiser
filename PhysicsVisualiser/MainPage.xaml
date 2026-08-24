@@ -134,7 +134,7 @@
 
                     <!-- Applied ForceX -->
                     <Grid Grid.Row="7" ColumnDefinitions="*, Auto, Auto" ColumnSpacing="10">
-                        <Label Grid.Column="0" Text="Aplied ForceX" TextColor="Black" FontAttributes="Bold" VerticalTextAlignment="Center" />
+                        <Label Grid.Column="0" Text="Applied ForceX" TextColor="Black" FontAttributes="Bold" VerticalTextAlignment="Center" />
                         <Label Grid.Column="1" 
                                 Text="{Binding SolverCurrentAppliedForceX, StringFormat='{0:F3}'}" TextColor="Black" 
                                 VerticalTextAlignment="Center" HorizontalTextAlignment="End" WidthRequest="100" />
