@@ -9,6 +9,18 @@ internal enum DirectionXY
     Ynegative
 }
 
+internal static class DirectionXYExtensions
+{
+    public static DirectionXY Negate(this DirectionXY direction) => direction switch
+    {
+        DirectionXY.Xpositive => DirectionXY.Xnegative,
+        DirectionXY.Xnegative => DirectionXY.Ypositive,
+        DirectionXY.Ypositive => DirectionXY.Ynegative,
+        DirectionXY.Ynegative => DirectionXY.Xpositive,
+        _ => throw new ArgumentOutOfRangeException(nameof(direction), $"Not expected direction value: {direction}"), 
+    };
+}
+
 internal class Force
 {
     public DirectionXY Direction { get; set; }

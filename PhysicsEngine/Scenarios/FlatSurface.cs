@@ -120,6 +120,8 @@ public class FlatSurface : Scenario
     private readonly Force _fNetX = new Force(0, DirectionXY.Xpositive);
     private readonly Force _fNetY = new Force(0, DirectionXY.Xpositive);
 
+    private double _previousVelocity = 0.0;
+
 
     public FlatSurface() {}
 
@@ -175,7 +177,7 @@ public class FlatSurface : Scenario
 
         // friction
         _friction.Magnitude = Forces.Friction(FrictionCoefficient, Normal);  
-        if (Velocity <= 0)  // might be incorrect for first update since velocity isn't yet updated
+        if (_previousVelocity <= 0)  // might be incorrect for first update since velocity isn't yet updated
         {
             _friction.Direction = DirectionXY.Xpositive;
         }
@@ -204,7 +206,7 @@ public class FlatSurface : Scenario
         Acceleration = _fNetX.SignedMagnitude / Mass;
         Position = Motion.DisplacementUsingAcceleration(InitialVelocity, CurrentTime, Acceleration);
         Velocity = Motion.FinalVelocity(InitialVelocity, Acceleration, CurrentTime);
-
+        _previousVelocity = Velocity;
 
 
         Console.WriteLine("WeightX : " + box.WeightX.SignedMagnitude);
