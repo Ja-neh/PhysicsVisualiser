@@ -28,7 +28,7 @@
                 <Button Grid.Column="1" Text="Pause" Background="IndianRed" TextColor="White" HeightRequest="40"
                         Command="{Binding PauseCommand}" IsEnabled="{Binding CanPause}" />
 
-                <Button Grid.Column="2" Text="Reset" Background="Black" TextColor="White" HeightRequest="40"
+                <Button Grid.Column="2" Text="Restart" Background="Black" TextColor="White" HeightRequest="40"
                         Command="{Binding RestartCommand}" IsEnabled="{Binding CanRestart}"/>
 
                 <Border Grid.Column="3" StrokeShape="RoundRectangle 6" Stroke="Black" Background="White" Padding="10" HeightRequest="40" >
@@ -50,14 +50,14 @@
         </Grid>
 
         <!-- divider -->
-        <BoxView Grid.Column="1" Color="Grey" WidthRequest="2"/>
+        <BoxView Grid.Column="1" Color="Black" WidthRequest="2"/>
 
         <!-- right -->
         <ScrollView Grid.Column="2" Background="#F0F2F5" >
             <Grid RowDefinitions="Auto, Auto, Auto" Padding="15">
 
                 <!-- realtime updates -->
-                <Grid Grid.Row="0" RowDefinitions="*, *, *, *, *, *, *, *" RowSpacing="8">
+                <Grid Grid.Row="0" RowDefinitions="*, *, *, *, *, *, *, *, *, *, *" RowSpacing="8">
                     <Label Grid.Row="0" Text="Updates:" TextColor="Black" FontSize="20" FontAttributes="Bold,Italic" Margin="0, 0, 0, 20"/>
 
                     <!-- PositionX -->
@@ -132,11 +132,35 @@
                         </Border>
                     </Grid>
 
-                    <!-- Net ForceX -->
+                    <!-- Applied ForceX -->
                     <Grid Grid.Row="7" ColumnDefinitions="*, Auto, Auto" ColumnSpacing="10">
-                        <Label Grid.Column="0" Text="Net Force" TextColor="Black" FontAttributes="Bold" VerticalTextAlignment="Center" />
+                        <Label Grid.Column="0" Text="Aplied ForceX" TextColor="Black" FontAttributes="Bold" VerticalTextAlignment="Center" />
                         <Label Grid.Column="1" 
-                               Text="{Binding SolverCurrentNetForce, StringFormat='{0:F3}'}" TextColor="Black" 
+                                Text="{Binding SolverCurrentAppliedForceX, StringFormat='{0:F3}'}" TextColor="Black" 
+                                VerticalTextAlignment="Center" HorizontalTextAlignment="End" WidthRequest="100" />
+                        <Border Grid.Column="2" StrokeShape="RoundRectangle 4" BackgroundColor="Black" Padding="0">
+                            <Label Text="N" TextColor="White" HeightRequest="35" WidthRequest="40" 
+                            HorizontalTextAlignment="Center" VerticalTextAlignment="Center" />
+                        </Border>   
+                    </Grid>
+
+                    <!-- Applied ForceY -->
+                    <Grid Grid.Row="8" ColumnDefinitions="*, Auto, Auto" ColumnSpacing="10">
+                        <Label Grid.Column="0" Text="Applied ForceY" TextColor="Black" FontAttributes="Bold" VerticalTextAlignment="Center" />
+                        <Label Grid.Column="1" 
+                                Text="{Binding SolverCurrentAppliedForceY, StringFormat='{0:F3}'}" TextColor="Black" 
+                                VerticalTextAlignment="Center" HorizontalTextAlignment="End" WidthRequest="100" />
+                        <Border Grid.Column="2" StrokeShape="RoundRectangle 4" BackgroundColor="Black" Padding="0">
+                            <Label Text="N" TextColor="White" HeightRequest="35" WidthRequest="40" 
+                            HorizontalTextAlignment="Center" VerticalTextAlignment="Center" />
+                        </Border>
+                    </Grid>
+
+                    <!-- Net ForceX -->
+                    <Grid Grid.Row="9" ColumnDefinitions="*, Auto, Auto" ColumnSpacing="10">
+                        <Label Grid.Column="0" Text="Net ForceX" TextColor="Black" FontAttributes="Bold" VerticalTextAlignment="Center" />
+                        <Label Grid.Column="1" 
+                               Text="{Binding SolverCurrentNetForceX, StringFormat='{0:F3}'}" TextColor="Black" 
                                VerticalTextAlignment="Center" HorizontalTextAlignment="End" WidthRequest="100" />
                         <Border Grid.Column="2" StrokeShape="RoundRectangle 4" BackgroundColor="Black" Padding="0">
                             <Label Text="N" TextColor="White" HeightRequest="35" WidthRequest="40" 
@@ -144,10 +168,22 @@
                         </Border>
                     </Grid>
 
+                    <!-- Net ForceY -->
+                    <Grid Grid.Row="10" ColumnDefinitions="*, Auto, Auto" ColumnSpacing="10">
+                        <Label Grid.Column="0" Text="Net ForceY" TextColor="Black" FontAttributes="Bold" VerticalTextAlignment="Center" />
+                        <Label Grid.Column="1" 
+                                Text="{Binding SolverCurrentNetForceY, StringFormat='{0:F3}'}" TextColor="Black" 
+                                VerticalTextAlignment="Center" HorizontalTextAlignment="End" WidthRequest="100" />
+                        <Border Grid.Column="2" StrokeShape="RoundRectangle 4" BackgroundColor="Black" Padding="0">
+                            <Label Text="N" TextColor="White" HeightRequest="35" WidthRequest="40" 
+                            HorizontalTextAlignment="Center" VerticalTextAlignment="Center" />
+                        </Border>
+                    </Grid>
+
                 </Grid>
 
                 <!-- divider -->
-                <BoxView Grid.Row="1" Color="Grey" HeightRequest="2" Margin="0, 40, 0, 40"/>
+                <BoxView Grid.Row="1" Color="Black" HeightRequest="2" Margin="0, 40, 0, 40"/>
 
                 <!-- inputs -->
                 <Grid Grid.Row="2" RowDefinitions="*, *, *, *, *, *, *, *" RowSpacing="10">

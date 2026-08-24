@@ -5,8 +5,6 @@ using System.Windows.Input;
 using Microsoft.Maui.Dispatching;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using PhysicsEngine;
-using PhysicsEngine.Bodies;
 using PhysicsEngine.Scenarios;
 using PhysicsEngine.Formulas;
 
@@ -51,7 +49,13 @@ public partial class FlatSurfaceViewModel : ObservableObject
     [ObservableProperty]
     public partial double SolverCurrentWeight { get; set; }
     [ObservableProperty]
-    public partial double SolverCurrentNetForce { get; set; }
+    public partial double SolverCurrentAppliedForceX { get; set; }
+    [ObservableProperty]
+    public partial double SolverCurrentAppliedForceY { get; set; }
+    [ObservableProperty]
+    public partial double SolverCurrentNetForceX { get; set; }
+    [ObservableProperty]
+    public partial double SolverCurrentNetForceY { get; set; }
 
     #region INPUT TO SOLVER
     partial void OnUserMassChanged(double value)
@@ -71,7 +75,7 @@ public partial class FlatSurfaceViewModel : ObservableObject
 
     partial void OnUserAppliedForceAngleChanged(double value)
     {
-        _flatScenario.AppliedForceAngle = value;
+        _flatScenario.AppliedForceAngle = Conversions.DegreesToRadians(value);
     }
 
     partial void OnUserFrictionCoefficientChanged(double value)
@@ -109,8 +113,8 @@ public partial class FlatSurfaceViewModel : ObservableObject
         IsRunning = true;
         if (_timer is null)
         {
-            _timer = Dispatcher.GetForCurrentThread()?.CreateTimer() ?? throw new InvalidOperationException("Dispatcher.GetForCurrent thread called from background thread");
-            _timer.Interval = TimeSpan.FromSeconds(1.0 / 60.0); // 60 fps
+            _timer = Dispatcher.GetForCurrentThread()?.CreateTimer() ?? throw new InvalidOperationException("Timer couldn't be created");
+            _timer.Interval = TimeSpan.FromSeconds(_fixedTimeStep); // 60 fps
             _timer.Tick += OnTimerTick;
         }
         _timer.Start();
@@ -152,7 +156,7 @@ public partial class FlatSurfaceViewModel : ObservableObject
 
         while (_accumulatedTime >= _fixedTimeStep)
         {
-            _flatScenario.Update(_fixedTimeStep);    // checked in Play() -- never set to null once initialised
+            _flatScenario.Update(_fixedTimeStep);
             _accumulatedTime -= _fixedTimeStep;
         }
 
@@ -169,9 +173,12 @@ public partial class FlatSurfaceViewModel : ObservableObject
         SolverCurrentVelocity = _flatScenario.Velocity;
         SolverCurrentAcceleration = _flatScenario.Acceleration;
         SolverCurrentNormalForce = _flatScenario.Normal;
-        SolverCurrentFrictionForce = Forces.Friction(UserFrictionCoefficient, SolverCurrentNormalForce);
+        SolverCurrentFrictionForce = _flatScenario.Friction;
         SolverCurrentWeight = _flatScenario.Weight;
-        SolverCurrentNetForce = Forces.FNet(UserMass, SolverCurrentAcceleration);
+        SolverCurrentAppliedForceX = _flatScenario.AppliedForceX;
+        SolverCurrentAppliedForceY = _flatScenario.AppliedForceY;
+        SolverCurrentNetForceX = _flatScenario.FNetX;
+        SolverCurrentNetForceY = _flatScenario.FNetY;
     }
 
 }

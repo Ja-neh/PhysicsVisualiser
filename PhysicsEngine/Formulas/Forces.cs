@@ -25,9 +25,9 @@ public static class Forces
         return fnet * deltaTime;
     }
 
-    public static double Impulse(double mass, double iVelocity, double fVelocity)
+    public static double Impulse(double mass, double initialVelocity, double finalVelocity)
     {
-        return mass * (fVelocity - iVelocity);
+        return mass * (finalVelocity - initialVelocity);
     }
 
     public static double GravitationalForce(double massOne, double massTwo, double radius)
