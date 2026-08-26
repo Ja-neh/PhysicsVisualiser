@@ -150,6 +150,10 @@ public class FlatSurface : Scenario
         Position = 0.0;
         Velocity = 0.0;
         Acceleration = 0.0;
+        _fNetX.Magnitude = 0.0;
+        _fNetX.Direction = DirectionXY.Xpositive;
+        _fNetY.Magnitude = 0.0;
+        _fNetY.Direction = DirectionXY.Ypositive;
     }
 
     public void Reset()

@@ -1,6 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:skia="clr-namespace:SkiaSharp.Views.Maui.Controls;assembly=SkiaSharp.Views.Maui.Controls"
              xmlns:vm="clr-namespace:PhysicsVisualiser.ViewModels"
              x:Class="PhysicsVisualiser.MainPage"
              Title="Flat Surface">
@@ -13,257 +14,275 @@
     
     <Grid ColumnSpacing="0" ColumnDefinitions="*, Auto, *">
         <!-- left -->
-        <Grid Grid.Column="0" Background="White" RowDefinitions="Auto, *" >
-
-            <!-- Top border line -->
-            <BoxView VerticalOptions="Start" HeightRequest="2" BackgroundColor="Black" />
+        <Grid Grid.Column="0" Background="grey" RowDefinitions="Auto, Auto, *" >
 
             <!-- simulation control buttons -->
-            <Grid Grid.Row="0" Background="#F0F2F5" Padding="10" ColumnDefinitions="*, *, *, *" ColumnSpacing="10">
+            <Border Grid.Row="0" Stroke="#222222" Margin="1">
+                <Border.StrokeShape>
+                    <RoundRectangle CornerRadius="15" />
+                </Border.StrokeShape>
+                <Grid Background="#F0F2F5" Padding="10" ColumnDefinitions="*, *, *, *" ColumnSpacing="10">
 
 
-                <Button Grid.Column="0" Text="Play" Background="Green" TextColor="White" HeightRequest="40"
-                        Command="{Binding PlayCommand}" IsEnabled="{Binding CanPlay}"/>
+                    <Button Grid.Column="0" Text="Play" Background="Green" TextColor="White" HeightRequest="40"
+                            Command="{Binding PlayCommand}" IsEnabled="{Binding CanPlay}"/>
 
-                <Button Grid.Column="1" Text="Pause" Background="IndianRed" TextColor="White" HeightRequest="40"
-                        Command="{Binding PauseCommand}" IsEnabled="{Binding CanPause}" />
+                    <Button Grid.Column="1" Text="Pause" Background="IndianRed" TextColor="White" HeightRequest="40"
+                            Command="{Binding PauseCommand}" IsEnabled="{Binding CanPause}" />
 
-                <Button Grid.Column="2" Text="Restart" Background="Black" TextColor="White" HeightRequest="40"
-                        Command="{Binding RestartCommand}" IsEnabled="{Binding CanRestart}"/>
+                    <Button Grid.Column="2" Text="Restart" Background="Black" TextColor="White" HeightRequest="40"
+                            Command="{Binding RestartCommand}" IsEnabled="{Binding CanRestart}"/>
 
-                <Border Grid.Column="3" StrokeShape="RoundRectangle 6" Stroke="Black" Background="White" Padding="10" HeightRequest="40" >
-                    <Grid ColumnDefinitions="*, Auto">
-                        <Label Grid.Column="0" Text=" t : " TextColor="Black" VerticalTextAlignment="Center" FontAttributes="Bold" />
-                        <Label Grid.Column="1" Text="{Binding SolverCurrentTime, StringFormat='{0:F3} s'}" TextColor="Black" VerticalTextAlignment="Center" FontAttributes="Bold" />
-                    </Grid>
-                </Border>
-                
-                    
-            </Grid>
+                    <Border Grid.Column="3" StrokeShape="RoundRectangle 6" Stroke="Black" Background="White" Padding="10" HeightRequest="40" >
+                        <Grid ColumnDefinitions="*, Auto">
+                            <Label Grid.Column="0" Text=" t : " TextColor="Black" VerticalTextAlignment="Center" FontAttributes="Bold" />
+                            <Label Grid.Column="1" Text="{Binding SolverCurrentTime, StringFormat='{0:F3} s'}" TextColor="Black" VerticalTextAlignment="Center" FontAttributes="Bold" />
+                        </Grid>
+                    </Border>
 
-            <!-- Bottom border line -->
-            <BoxView VerticalOptions="End" HeightRequest="2" BackgroundColor="Black" />
 
+                </Grid>
+            </Border>
+
+            <!-- divider -->
+            <BoxView Grid.Row="1" Color="grey" HeightRequest="2"/>
 
             <!-- Skiasharp Canvas -->
+            <Border Grid.Row="2" Stroke="#222222" Margin="1">
+                <Border.StrokeShape>
+                    <RoundRectangle CornerRadius="15" />
+                </Border.StrokeShape>
+                <skia:SKCanvasView x:Name="SkiaCanvasView"
+                                   VerticalOptions="Fill"
+                                   HorizontalOptions="Fill"
+                                   PaintSurface="OnSkiaCanvasViewPaintSurface" />
+            </Border>
             
         </Grid>
 
         <!-- divider -->
-        <BoxView Grid.Column="1" Color="Black" WidthRequest="2"/>
+        <BoxView Grid.Column="1" Color="grey" WidthRequest="2"/>
 
         <!-- right -->
-        <ScrollView Grid.Column="2" Background="#F0F2F5" >
-            <Grid RowDefinitions="Auto, Auto, Auto" Padding="15">
+        <ScrollView Grid.Column="2" Background="grey" >
+            
+            <Border Stroke="#222222" Margin="1">
+                <Border.StrokeShape>
+                    <RoundRectangle CornerRadius="15" />
+                </Border.StrokeShape>
 
-                <!-- realtime updates -->
-                <Grid Grid.Row="0" RowDefinitions="*, *, *, *, *, *, *, *, *, *, *" RowSpacing="8">
-                    <Label Grid.Row="0" Text="Updates:" TextColor="Black" FontSize="20" FontAttributes="Bold,Italic" Margin="0, 0, 0, 20"/>
+                <Grid Background="#F0F2F5" RowDefinitions="Auto, Auto, Auto" Padding="15">
 
-                    <!-- PositionX -->
-                    <Grid Grid.Row="1" ColumnDefinitions="*, Auto, Auto" ColumnSpacing="10">
-                        <Label Grid.Column="0" Text="Position" TextColor="Black" FontAttributes="Bold" VerticalTextAlignment="Center" />
-                        <Label Grid.Column="1" 
+                    <!-- realtime updates -->
+                    <Grid Grid.Row="0" RowDefinitions="*, *, *, *, *, *, *, *, *, *, *" RowSpacing="8">
+                        <Label Grid.Row="0" Text="Updates:" TextColor="Black" FontSize="20" FontAttributes="Bold,Italic" Margin="0, 0, 0, 20"/>
+
+                        <!-- PositionX -->
+                        <Grid Grid.Row="1" ColumnDefinitions="*, Auto, Auto" ColumnSpacing="10">
+                            <Label Grid.Column="0" Text="Position" TextColor="Black" FontAttributes="Bold" VerticalTextAlignment="Center" />
+                            <Label Grid.Column="1" 
                                Text="{Binding SolverCurrentPosition, StringFormat='{0:F3}'}" TextColor="Black" 
                                VerticalTextAlignment="Center" HorizontalTextAlignment="End" WidthRequest="100" />
-                        <Border Grid.Column="2" StrokeShape="RoundRectangle 4" BackgroundColor="Black" Padding="0">
-                            <Label Text="m" TextColor="White" HeightRequest="35" WidthRequest="40" 
+                            <Border Grid.Column="2" StrokeShape="RoundRectangle 4" BackgroundColor="Black" Padding="0">
+                                <Label Text="m" TextColor="White" HeightRequest="35" WidthRequest="40" 
                            HorizontalTextAlignment="Center" VerticalTextAlignment="Center" />
-                        </Border>
-                    </Grid>
+                            </Border>
+                        </Grid>
 
-                    <!-- VelocityX -->
-                    <Grid Grid.Row="2" ColumnDefinitions="*, Auto, Auto" ColumnSpacing="10">
-                        <Label Grid.Column="0" Text="Velocity" TextColor="Black" FontAttributes="Bold" VerticalTextAlignment="Center" />
-                        <Label Grid.Column="1" 
+                        <!-- VelocityX -->
+                        <Grid Grid.Row="2" ColumnDefinitions="*, Auto, Auto" ColumnSpacing="10">
+                            <Label Grid.Column="0" Text="Velocity" TextColor="Black" FontAttributes="Bold" VerticalTextAlignment="Center" />
+                            <Label Grid.Column="1" 
                                Text="{Binding SolverCurrentVelocity, StringFormat='{0:F3}'}" TextColor="Black" 
                                VerticalTextAlignment="Center" HorizontalTextAlignment="End" WidthRequest="100" />
-                        <Border Grid.Column="2" StrokeShape="RoundRectangle 4" BackgroundColor="Black" Padding="0">
-                            <Label Text="m/s" TextColor="White" HeightRequest="35" WidthRequest="40" 
+                            <Border Grid.Column="2" StrokeShape="RoundRectangle 4" BackgroundColor="Black" Padding="0">
+                                <Label Text="m/s" TextColor="White" HeightRequest="35" WidthRequest="40" 
                            HorizontalTextAlignment="Center" VerticalTextAlignment="Center" />
-                        </Border>
-                    </Grid>
+                            </Border>
+                        </Grid>
 
-                    <!-- AccelerationX -->
-                    <Grid Grid.Row="3" ColumnDefinitions="*, Auto, Auto" ColumnSpacing="10">
-                        <Label Grid.Column="0" Text="Acceleration" TextColor="Black" FontAttributes="Bold" VerticalTextAlignment="Center" />
-                        <Label Grid.Column="1" 
+                        <!-- AccelerationX -->
+                        <Grid Grid.Row="3" ColumnDefinitions="*, Auto, Auto" ColumnSpacing="10">
+                            <Label Grid.Column="0" Text="Acceleration" TextColor="Black" FontAttributes="Bold" VerticalTextAlignment="Center" />
+                            <Label Grid.Column="1" 
                                Text="{Binding SolverCurrentAcceleration, StringFormat='{0:F3}'}" TextColor="Black" 
                                VerticalTextAlignment="Center" HorizontalTextAlignment="End" WidthRequest="100" />
-                        <Border Grid.Column="2" StrokeShape="RoundRectangle 4" BackgroundColor="Black" Padding="0">
-                            <Label Text="m/s²" TextColor="White" HeightRequest="35" WidthRequest="40" 
+                            <Border Grid.Column="2" StrokeShape="RoundRectangle 4" BackgroundColor="Black" Padding="0">
+                                <Label Text="m/s²" TextColor="White" HeightRequest="35" WidthRequest="40" 
                            HorizontalTextAlignment="Center" VerticalTextAlignment="Center" />
-                        </Border>
-                    </Grid>
+                            </Border>
+                        </Grid>
 
-                    <!-- Normal Force -->
-                    <Grid Grid.Row="4" ColumnDefinitions="*, Auto, Auto" ColumnSpacing="10">
-                        <Label Grid.Column="0" Text="Normal Force" TextColor="Black" FontAttributes="Bold" VerticalTextAlignment="Center" />
-                        <Label Grid.Column="1" 
+                        <!-- Normal Force -->
+                        <Grid Grid.Row="4" ColumnDefinitions="*, Auto, Auto" ColumnSpacing="10">
+                            <Label Grid.Column="0" Text="Normal Force" TextColor="Black" FontAttributes="Bold" VerticalTextAlignment="Center" />
+                            <Label Grid.Column="1" 
                                Text="{Binding SolverCurrentNormalForce, StringFormat='{0:F3}'}" TextColor="Black" 
                                VerticalTextAlignment="Center" HorizontalTextAlignment="End" WidthRequest="100" />
-                        <Border Grid.Column="2" StrokeShape="RoundRectangle 4" BackgroundColor="Black" Padding="0">
-                            <Label Text="N" TextColor="White" HeightRequest="35" WidthRequest="40" 
+                            <Border Grid.Column="2" StrokeShape="RoundRectangle 4" BackgroundColor="Black" Padding="0">
+                                <Label Text="N" TextColor="White" HeightRequest="35" WidthRequest="40" 
                            HorizontalTextAlignment="Center" VerticalTextAlignment="Center" />
-                        </Border>
-                    </Grid>
+                            </Border>
+                        </Grid>
 
-                    <!-- Friction Force -->
-                    <Grid Grid.Row="5" ColumnDefinitions="*, Auto, Auto" ColumnSpacing="10">
-                        <Label Grid.Column="0" Text="Friction Force" TextColor="Black" FontAttributes="Bold" VerticalTextAlignment="Center" />
-                        <Label Grid.Column="1" 
+                        <!-- Friction Force -->
+                        <Grid Grid.Row="5" ColumnDefinitions="*, Auto, Auto" ColumnSpacing="10">
+                            <Label Grid.Column="0" Text="Friction Force" TextColor="Black" FontAttributes="Bold" VerticalTextAlignment="Center" />
+                            <Label Grid.Column="1" 
                                Text="{Binding SolverCurrentFrictionForce, StringFormat='{0:F3}'}" TextColor="Black"
                                VerticalTextAlignment="Center" HorizontalTextAlignment="End" WidthRequest="100" />
-                        <Border Grid.Column="2" StrokeShape="RoundRectangle 4" BackgroundColor="Black" Padding="0">
-                            <Label Text="N" TextColor="White" HeightRequest="35" WidthRequest="40" 
+                            <Border Grid.Column="2" StrokeShape="RoundRectangle 4" BackgroundColor="Black" Padding="0">
+                                <Label Text="N" TextColor="White" HeightRequest="35" WidthRequest="40" 
                            HorizontalTextAlignment="Center" VerticalTextAlignment="Center" />
-                        </Border>
-                    </Grid>
+                            </Border>
+                        </Grid>
 
-                    <!-- WeightY -->
-                    <Grid Grid.Row="6" ColumnDefinitions="*, Auto, Auto" ColumnSpacing="10">
-                        <Label Grid.Column="0" Text="Weight" TextColor="Black" FontAttributes="Bold" VerticalTextAlignment="Center" />
-                        <Label Grid.Column="1" 
+                        <!-- WeightY -->
+                        <Grid Grid.Row="6" ColumnDefinitions="*, Auto, Auto" ColumnSpacing="10">
+                            <Label Grid.Column="0" Text="Weight" TextColor="Black" FontAttributes="Bold" VerticalTextAlignment="Center" />
+                            <Label Grid.Column="1" 
                                Text="{Binding SolverCurrentWeight, StringFormat='{0:F3}'}" TextColor="Black" 
                                VerticalTextAlignment="Center" HorizontalTextAlignment="End" WidthRequest="100" />
-                        <Border Grid.Column="2" StrokeShape="RoundRectangle 4" BackgroundColor="Black" Padding="0">
-                            <Label Text="N" TextColor="White" HeightRequest="35" WidthRequest="40" 
+                            <Border Grid.Column="2" StrokeShape="RoundRectangle 4" BackgroundColor="Black" Padding="0">
+                                <Label Text="N" TextColor="White" HeightRequest="35" WidthRequest="40" 
                            HorizontalTextAlignment="Center" VerticalTextAlignment="Center" />
-                        </Border>
-                    </Grid>
+                            </Border>
+                        </Grid>
 
-                    <!-- Applied ForceX -->
-                    <Grid Grid.Row="7" ColumnDefinitions="*, Auto, Auto" ColumnSpacing="10">
-                        <Label Grid.Column="0" Text="Applied ForceX" TextColor="Black" FontAttributes="Bold" VerticalTextAlignment="Center" />
-                        <Label Grid.Column="1" 
+                        <!-- Applied ForceX -->
+                        <Grid Grid.Row="7" ColumnDefinitions="*, Auto, Auto" ColumnSpacing="10">
+                            <Label Grid.Column="0" Text="Applied ForceX" TextColor="Black" FontAttributes="Bold" VerticalTextAlignment="Center" />
+                            <Label Grid.Column="1" 
                                 Text="{Binding SolverCurrentAppliedForceX, StringFormat='{0:F3}'}" TextColor="Black" 
                                 VerticalTextAlignment="Center" HorizontalTextAlignment="End" WidthRequest="100" />
-                        <Border Grid.Column="2" StrokeShape="RoundRectangle 4" BackgroundColor="Black" Padding="0">
-                            <Label Text="N" TextColor="White" HeightRequest="35" WidthRequest="40" 
+                            <Border Grid.Column="2" StrokeShape="RoundRectangle 4" BackgroundColor="Black" Padding="0">
+                                <Label Text="N" TextColor="White" HeightRequest="35" WidthRequest="40" 
                             HorizontalTextAlignment="Center" VerticalTextAlignment="Center" />
-                        </Border>   
-                    </Grid>
+                            </Border>
+                        </Grid>
 
-                    <!-- Applied ForceY -->
-                    <Grid Grid.Row="8" ColumnDefinitions="*, Auto, Auto" ColumnSpacing="10">
-                        <Label Grid.Column="0" Text="Applied ForceY" TextColor="Black" FontAttributes="Bold" VerticalTextAlignment="Center" />
-                        <Label Grid.Column="1" 
+                        <!-- Applied ForceY -->
+                        <Grid Grid.Row="8" ColumnDefinitions="*, Auto, Auto" ColumnSpacing="10">
+                            <Label Grid.Column="0" Text="Applied ForceY" TextColor="Black" FontAttributes="Bold" VerticalTextAlignment="Center" />
+                            <Label Grid.Column="1" 
                                 Text="{Binding SolverCurrentAppliedForceY, StringFormat='{0:F3}'}" TextColor="Black" 
                                 VerticalTextAlignment="Center" HorizontalTextAlignment="End" WidthRequest="100" />
-                        <Border Grid.Column="2" StrokeShape="RoundRectangle 4" BackgroundColor="Black" Padding="0">
-                            <Label Text="N" TextColor="White" HeightRequest="35" WidthRequest="40" 
+                            <Border Grid.Column="2" StrokeShape="RoundRectangle 4" BackgroundColor="Black" Padding="0">
+                                <Label Text="N" TextColor="White" HeightRequest="35" WidthRequest="40" 
                             HorizontalTextAlignment="Center" VerticalTextAlignment="Center" />
-                        </Border>
-                    </Grid>
+                            </Border>
+                        </Grid>
 
-                    <!-- Net ForceX -->
-                    <Grid Grid.Row="9" ColumnDefinitions="*, Auto, Auto" ColumnSpacing="10">
-                        <Label Grid.Column="0" Text="Net ForceX" TextColor="Black" FontAttributes="Bold" VerticalTextAlignment="Center" />
-                        <Label Grid.Column="1" 
+                        <!-- Net ForceX -->
+                        <Grid Grid.Row="9" ColumnDefinitions="*, Auto, Auto" ColumnSpacing="10">
+                            <Label Grid.Column="0" Text="Net ForceX" TextColor="Black" FontAttributes="Bold" VerticalTextAlignment="Center" />
+                            <Label Grid.Column="1" 
                                Text="{Binding SolverCurrentNetForceX, StringFormat='{0:F3}'}" TextColor="Black" 
                                VerticalTextAlignment="Center" HorizontalTextAlignment="End" WidthRequest="100" />
-                        <Border Grid.Column="2" StrokeShape="RoundRectangle 4" BackgroundColor="Black" Padding="0">
-                            <Label Text="N" TextColor="White" HeightRequest="35" WidthRequest="40" 
+                            <Border Grid.Column="2" StrokeShape="RoundRectangle 4" BackgroundColor="Black" Padding="0">
+                                <Label Text="N" TextColor="White" HeightRequest="35" WidthRequest="40" 
                            HorizontalTextAlignment="Center" VerticalTextAlignment="Center" />
-                        </Border>
-                    </Grid>
+                            </Border>
+                        </Grid>
 
-                    <!-- Net ForceY -->
-                    <Grid Grid.Row="10" ColumnDefinitions="*, Auto, Auto" ColumnSpacing="10">
-                        <Label Grid.Column="0" Text="Net ForceY" TextColor="Black" FontAttributes="Bold" VerticalTextAlignment="Center" />
-                        <Label Grid.Column="1" 
+                        <!-- Net ForceY -->
+                        <Grid Grid.Row="10" ColumnDefinitions="*, Auto, Auto" ColumnSpacing="10">
+                            <Label Grid.Column="0" Text="Net ForceY" TextColor="Black" FontAttributes="Bold" VerticalTextAlignment="Center" />
+                            <Label Grid.Column="1" 
                                 Text="{Binding SolverCurrentNetForceY, StringFormat='{0:F3}'}" TextColor="Black" 
                                 VerticalTextAlignment="Center" HorizontalTextAlignment="End" WidthRequest="100" />
-                        <Border Grid.Column="2" StrokeShape="RoundRectangle 4" BackgroundColor="Black" Padding="0">
-                            <Label Text="N" TextColor="White" HeightRequest="35" WidthRequest="40" 
+                            <Border Grid.Column="2" StrokeShape="RoundRectangle 4" BackgroundColor="Black" Padding="0">
+                                <Label Text="N" TextColor="White" HeightRequest="35" WidthRequest="40" 
                             HorizontalTextAlignment="Center" VerticalTextAlignment="Center" />
-                        </Border>
+                            </Border>
+                        </Grid>
+
                     </Grid>
 
-                </Grid>
+                    <!-- divider -->
+                    <BoxView Grid.Row="1" Color="Black" HeightRequest="2" Margin="0, 40, 0, 40"/>
 
-                <!-- divider -->
-                <BoxView Grid.Row="1" Color="Black" HeightRequest="2" Margin="0, 40, 0, 40"/>
+                    <!-- inputs -->
+                    <Grid Grid.Row="2" RowDefinitions="*, *, *, *, *, *, *, *" RowSpacing="10">
+                        <Label Grid.Row="0" Text="Inputs:" TextColor="Black" FontSize="20" FontAttributes="Bold,Italic" Margin="0, 0, 0, 20"/>
 
-                <!-- inputs -->
-                <Grid Grid.Row="2" RowDefinitions="*, *, *, *, *, *, *, *" RowSpacing="10">
-                    <Label Grid.Row="0" Text="Inputs:" TextColor="Black" FontSize="20" FontAttributes="Bold,Italic" Margin="0, 0, 0, 20"/>
-
-                    <!-- Mass -->
-                    <Grid Grid.Row="1" ColumnDefinitions="*, Auto, Auto" ColumnSpacing="10">
-                        <Label Grid.Column="0" Text="Mass" TextColor="Black" FontAttributes="Bold" VerticalTextAlignment="Center" />
-                        <Entry Grid.Column="1" Keyboard="Numeric"
+                        <!-- Mass -->
+                        <Grid Grid.Row="1" ColumnDefinitions="*, Auto, Auto" ColumnSpacing="10">
+                            <Label Grid.Column="0" Text="Mass" TextColor="Black" FontAttributes="Bold" VerticalTextAlignment="Center" />
+                            <Entry Grid.Column="1" Keyboard="Numeric"
                                Text="{Binding UserMass, StringFormat='{0:F3}'}" HeightRequest="40" WidthRequest="100" 
                                 BackgroundColor="White" TextColor="Black" />
-                        <Border Grid.Column="2" StrokeShape="RoundRectangle 4" BackgroundColor="Black" Padding="0">
-                            <Label Text="kg" TextColor="White" HeightRequest="40" WidthRequest="45" 
+                            <Border Grid.Column="2" StrokeShape="RoundRectangle 4" BackgroundColor="Black" Padding="0">
+                                <Label Text="kg" TextColor="White" HeightRequest="40" WidthRequest="45" 
                            HorizontalTextAlignment="Center" VerticalTextAlignment="Center" />
-                        </Border>
-                    </Grid>
+                            </Border>
+                        </Grid>
 
-                    <!-- Initial Velocity -->
-                    <Grid Grid.Row="2" ColumnDefinitions="*, Auto, Auto" ColumnSpacing="10">
-                        <Label Grid.Column="0" Text="Initial Velocity" TextColor="Black" FontAttributes="Bold" VerticalTextAlignment="Center" />
-                        <Entry Grid.Column="1" Keyboard="Numeric" 
+                        <!-- Initial Velocity -->
+                        <Grid Grid.Row="2" ColumnDefinitions="*, Auto, Auto" ColumnSpacing="10">
+                            <Label Grid.Column="0" Text="Initial Velocity" TextColor="Black" FontAttributes="Bold" VerticalTextAlignment="Center" />
+                            <Entry Grid.Column="1" Keyboard="Numeric" 
                                Text="{Binding UserInitialVelocity, StringFormat='{0:F3}'}" HeightRequest="40" WidthRequest="100" 
                                 BackgroundColor="White" TextColor="Black"  />
-                        <Border Grid.Column="2" StrokeShape="RoundRectangle 4" BackgroundColor="Black" Padding="0">
-                            <Label Text="m/s" TextColor="White" HeightRequest="40" WidthRequest="45" 
+                            <Border Grid.Column="2" StrokeShape="RoundRectangle 4" BackgroundColor="Black" Padding="0">
+                                <Label Text="m/s" TextColor="White" HeightRequest="40" WidthRequest="45" 
                            HorizontalTextAlignment="Center" VerticalTextAlignment="Center" />
-                        </Border>
-                    </Grid>
+                            </Border>
+                        </Grid>
 
-                    <!-- Applied Force -->
-                    <Grid Grid.Row="3" ColumnDefinitions="*, Auto, Auto" ColumnSpacing="10">
-                        <Label Grid.Column="0" Text="Applied Force" TextColor="Black" FontAttributes="Bold" VerticalTextAlignment="Center" />
-                        <Entry Grid.Column="1" Keyboard="Numeric" 
+                        <!-- Applied Force -->
+                        <Grid Grid.Row="3" ColumnDefinitions="*, Auto, Auto" ColumnSpacing="10">
+                            <Label Grid.Column="0" Text="Applied Force" TextColor="Black" FontAttributes="Bold" VerticalTextAlignment="Center" />
+                            <Entry Grid.Column="1" Keyboard="Numeric" 
                                Text="{Binding UserAppliedForce, StringFormat='{0:F3}'}" HeightRequest="40" WidthRequest="100" 
                                 BackgroundColor="White" TextColor="Black"  />
-                        <Border Grid.Column="2" StrokeShape="RoundRectangle 4" BackgroundColor="Black" Padding="0">
-                            <Label Text="N" TextColor="White" HeightRequest="40" WidthRequest="45" 
+                            <Border Grid.Column="2" StrokeShape="RoundRectangle 4" BackgroundColor="Black" Padding="0">
+                                <Label Text="N" TextColor="White" HeightRequest="40" WidthRequest="45" 
                            HorizontalTextAlignment="Center" VerticalTextAlignment="Center" />
-                        </Border>
-                    </Grid>
+                            </Border>
+                        </Grid>
 
-                    <!-- Applied Force Angle -->
-                    <Grid Grid.Row="4" ColumnDefinitions="*, Auto, Auto" ColumnSpacing="10">
-                        <Label Grid.Column="0" Text="Force Angle" TextColor="Black" FontAttributes="Bold" VerticalTextAlignment="Center" />
-                        <Entry Grid.Column="1" Keyboard="Numeric" 
+                        <!-- Applied Force Angle -->
+                        <Grid Grid.Row="4" ColumnDefinitions="*, Auto, Auto" ColumnSpacing="10">
+                            <Label Grid.Column="0" Text="Force Angle" TextColor="Black" FontAttributes="Bold" VerticalTextAlignment="Center" />
+                            <Entry Grid.Column="1" Keyboard="Numeric" 
                                Text="{Binding UserAppliedForceAngle, StringFormat='{0:F3}'}" HeightRequest="40" WidthRequest="100" 
                                 BackgroundColor="White" TextColor="Black"  />
-                        <Border Grid.Column="2" StrokeShape="RoundRectangle 4" BackgroundColor="Black" Padding="0">
-                            <Label Text="°" TextColor="White" HeightRequest="40" WidthRequest="45" 
+                            <Border Grid.Column="2" StrokeShape="RoundRectangle 4" BackgroundColor="Black" Padding="0">
+                                <Label Text="°" TextColor="White" HeightRequest="40" WidthRequest="45" 
                            HorizontalTextAlignment="Center" VerticalTextAlignment="Center" />
-                        </Border>
-                    </Grid>
+                            </Border>
+                        </Grid>
 
-                    <!-- Friction Coefficient -->
-                    <Grid Grid.Row="6" ColumnDefinitions="*, Auto, Auto" ColumnSpacing="10">
-                        <Label Grid.Column="0" Text="Friction Coefficient" TextColor="Black" FontAttributes="Bold" VerticalTextAlignment="Center" />
-                        <Entry Grid.Column="1" Keyboard="Numeric" 
+                        <!-- Friction Coefficient -->
+                        <Grid Grid.Row="6" ColumnDefinitions="*, Auto, Auto" ColumnSpacing="10">
+                            <Label Grid.Column="0" Text="Friction Coefficient" TextColor="Black" FontAttributes="Bold" VerticalTextAlignment="Center" />
+                            <Entry Grid.Column="1" Keyboard="Numeric" 
                                Text="{Binding UserFrictionCoefficient, StringFormat='{0:F3}'}" HeightRequest="40" WidthRequest="100" 
                                 BackgroundColor="White" TextColor="Black"  />
-                        <Border Grid.Column="2" StrokeShape="RoundRectangle 4" BackgroundColor="Black" Padding="0">
-                            <Label Text="μ" TextColor="White" HeightRequest="40" WidthRequest="45" 
+                            <Border Grid.Column="2" StrokeShape="RoundRectangle 4" BackgroundColor="Black" Padding="0">
+                                <Label Text="μ" TextColor="White" HeightRequest="40" WidthRequest="45" 
                            HorizontalTextAlignment="Center" VerticalTextAlignment="Center" />
-                        </Border>
-                    </Grid>
+                            </Border>
+                        </Grid>
 
-                    <!-- Gravity -->
-                    <Grid Grid.Row="7" ColumnDefinitions="*, Auto, Auto" ColumnSpacing="10">
-                        <Label Grid.Column="0" Text="Gravity" TextColor="Black" FontAttributes="Bold" VerticalTextAlignment="Center" />
-                        <Entry Grid.Column="1" Keyboard="Numeric" 
+                        <!-- Gravity -->
+                        <Grid Grid.Row="7" ColumnDefinitions="*, Auto, Auto" ColumnSpacing="10">
+                            <Label Grid.Column="0" Text="Gravity" TextColor="Black" FontAttributes="Bold" VerticalTextAlignment="Center" />
+                            <Entry Grid.Column="1" Keyboard="Numeric" 
                                Text="{Binding UserGravity, StringFormat='{0:F3}'}" HeightRequest="40" WidthRequest="100" 
                                 BackgroundColor="White" TextColor="Black"  />
-                        <Border Grid.Column="2" StrokeShape="RoundRectangle 4" BackgroundColor="Black" Padding="0">
-                            <Label Text="m/s²" TextColor="White" HeightRequest="40" WidthRequest="45" 
+                            <Border Grid.Column="2" StrokeShape="RoundRectangle 4" BackgroundColor="Black" Padding="0">
+                                <Label Text="m/s²" TextColor="White" HeightRequest="40" WidthRequest="45" 
                            HorizontalTextAlignment="Center" VerticalTextAlignment="Center" />
-                        </Border>
+                            </Border>
+                        </Grid>
+
                     </Grid>
 
                 </Grid>
-
-            </Grid>
+            </Border>
+            
         </ScrollView>
     </Grid>
 

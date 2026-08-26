@@ -1,12 +1,13 @@
-﻿using System;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
+using Microsoft.Maui.Dispatching;
+using PhysicsEngine.Formulas;
+using PhysicsEngine.Scenarios;
+using PhysicsVisualiser.Renderers;
+using System;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Windows.Input;
-using Microsoft.Maui.Dispatching;
-using CommunityToolkit.Mvvm.ComponentModel;
-using CommunityToolkit.Mvvm.Input;
-using PhysicsEngine.Scenarios;
-using PhysicsEngine.Formulas;
 
 namespace PhysicsVisualiser.ViewModels;
 
@@ -16,6 +17,10 @@ public partial class FlatSurfaceViewModel : ObservableObject
 
     private const double _fixedTimeStep = 1.0 / 60.0; // 60 fps
     private double _accumulatedTime = 0.0;
+
+    // Renderer
+    public FlatSurfaceRenderer Renderer { get; } = new FlatSurfaceRenderer();
+    public event Action? RequestInvalidateSurface;
 
     // Input properties
     [ObservableProperty]
@@ -142,6 +147,7 @@ public partial class FlatSurfaceViewModel : ObservableObject
 
         _flatScenario.Restart();
         SyncViewWithSolver();
+        RequestRepaint();
     }
     #endregion
 
@@ -161,6 +167,7 @@ public partial class FlatSurfaceViewModel : ObservableObject
         }
 
         SyncViewWithSolver();
+        RequestRepaint();
     }
 
 
@@ -181,5 +188,9 @@ public partial class FlatSurfaceViewModel : ObservableObject
         SolverCurrentNetForceY = _flatScenario.FNetY;
     }
 
+    public void RequestRepaint()
+    {
+        RequestInvalidateSurface?.Invoke();
+    }
 }
 
