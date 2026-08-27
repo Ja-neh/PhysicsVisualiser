@@ -1,4 +1,4 @@
-﻿using PhysicsVisualiser.ViewModels;
+using PhysicsVisualiser.ViewModels;
 using SkiaSharp.Views.Maui;
 using SkiaSharp;
 
@@ -95,7 +95,7 @@ public partial class MainPage : ContentPage
             canvas.Save();
             canvas.Scale(scaleX, scaleY);
 
-            ViewModel.Renderer.Render(canvas, new SKImageInfo((int)SkiaCanvasView.Width, (int)SkiaCanvasView.Height), ViewModel);
+            ViewModel.Renderer.Render(canvas, new SKImageInfo((int)SkiaCanvasView.Width, (int)SkiaCanvasView.Height), ViewModel.State);
         }
     }
 }

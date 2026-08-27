@@ -5,13 +5,30 @@ using PhysicsEngine.Quantities;
 
 namespace PhysicsEngine.Scenarios;
 
+public record FlatSurfaceState(
+    double Time,
+    double Mass,
+    double Position,
+    double Velocity,
+    double Acceleration,
+    double Normal,
+    double Weight,
+    double Friction,
+    double AppliedForceX,
+    double AppliedForceY,
+    double FNetX,
+    double FNetY
+
+) : ScenarioState();
+
 
 public class FlatSurface : Scenario
 {
     private readonly Box box = new Box();
 
-    #region PROPERTIES
-    // GET and SET
+    #region PUBLIC PROPERTIES
+    public double CurrentTime { get; private set; }
+
     public double Mass
     {
         get => box.Mass;
@@ -30,7 +47,18 @@ public class FlatSurface : Scenario
         }
     }
 
-    public double Position
+    public double AppliedForce { get; set; }
+    public double AppliedForceAngle { get; set; }
+
+    public double FrictionCoefficient { get; set; }
+
+    public double Gravity { get; set; } = Constants.earthGravitationalAcceleration;
+    #endregion
+
+
+    #region PRIVATE PROPERTIES
+    // from box properties
+    private double Position
     {
         get => box.PositionX;
         set
@@ -39,7 +67,7 @@ public class FlatSurface : Scenario
         }
     }
 
-    public double Velocity
+    private double Velocity
     {
         get => box.VelocityX;
         set
@@ -48,7 +76,7 @@ public class FlatSurface : Scenario
         }        
     }
 
-    public double Acceleration
+    private double Acceleration
     {
         get => box.AccelerationX;
         set
@@ -57,7 +85,7 @@ public class FlatSurface : Scenario
         }
     }
 
-    public double Weight
+    private double Weight
     {
         get => box.WeightX.SignedMagnitude;
         set
@@ -66,7 +94,7 @@ public class FlatSurface : Scenario
         }
     }
 
-    public double Normal
+    private double Normal
     {
         get => box.Normal.SignedMagnitude;
         set
@@ -74,45 +102,10 @@ public class FlatSurface : Scenario
             box.Normal.Magnitude = value;
         }
     }
-
-    public double AppliedForce { get; set; }
-    public double AppliedForceAngle { get; set; }
-
-    public double SurfaceInclination { get; set; }
-    public double FrictionCoefficient { get; set; }
-
-    public double Gravity { get; set; } = Constants.earthGravitationalAcceleration;
-
-    // GET only to outside
-    public double CurrentTime { get; private set; }
-
-    public double AppliedForceX
-    {
-        get => _appliedForceX.SignedMagnitude;
-    }
-
-    public double AppliedForceY
-    {
-        get => _appliedForceY.SignedMagnitude;
-    }
-
-    public double Friction
-    {
-        get => _friction.SignedMagnitude;
-    }
-
-    public double FNetX
-    {
-        get => _fNetX.SignedMagnitude;
-    }
-
-    public double FNetY
-    {
-        get => _fNetY.SignedMagnitude;
-    }
     #endregion
 
-    // FIELDS
+
+    #region FIELDS
     private readonly Force _appliedForceX = new Force(0, DirectionXY.Xpositive);
     private readonly Force _appliedForceY = new Force(0, DirectionXY.Ypositive);
 
@@ -121,7 +114,10 @@ public class FlatSurface : Scenario
     private readonly Force _fNetX = new Force(0, DirectionXY.Xpositive);
     private readonly Force _fNetY = new Force(0, DirectionXY.Xpositive);
 
-    private double _previousVelocity;
+    private FlatSurfaceState? _currentState;
+
+    private const double _surfaceInclination = 0.0;
+    #endregion
 
 
     public FlatSurface() {}
@@ -145,6 +141,7 @@ public class FlatSurface : Scenario
     public void Restart()
     {
         CurrentTime = default;
+
         Position = 0.0;
         Velocity = InitialVelocity;
         Acceleration = 0.0;
@@ -168,13 +165,13 @@ public class FlatSurface : Scenario
 
 
     public override void Update(double delta)   // using TotalTime instead of small deltas in calculations
-    {                                               // to avoid double inaccuracy
+    {                                               // to avoid double inaccuracy compounding over time
         if (CurrentTime == default) Initialize();
 
         CurrentTime += delta;
 
         // weight & normal
-        Weight = Forces.WeightPerpendicular(Mass, SurfaceInclination);
+        Weight = Forces.WeightPerpendicular(Mass, _surfaceInclination);
         Normal = Weight + _appliedForceY.SignedMagnitude;
 
         // fnetY
@@ -245,21 +242,18 @@ public class FlatSurface : Scenario
             Position = Motion.DisplacementUsingAcceleration(InitialVelocity, CurrentTime, Acceleration);
             Velocity = Motion.FinalVelocity(InitialVelocity, Acceleration, CurrentTime);
         }
-        
-        _previousVelocity = Velocity;
 
-
-        Console.WriteLine("WeightX : " + box.WeightX.SignedMagnitude);
-        Console.WriteLine("WeightY : " + box.WeightY.SignedMagnitude);
-        Console.WriteLine("Normal : " + box.Normal.SignedMagnitude);
-        Console.WriteLine("Position : " + box.PositionX);
-        Console.WriteLine("Velocity : " + box.VelocityX);
-        Console.WriteLine("Acceleration : " + box.AccelerationX);
-        Console.WriteLine("Friction : " + _friction.SignedMagnitude);
-        Console.WriteLine("FnetX : " + _fNetX.SignedMagnitude);
-        Console.WriteLine("FnetY : " + _fNetY.SignedMagnitude);
-        Console.WriteLine("--------------------------------------------------------");
     }
 
 
+    public FlatSurfaceState GetCurrentState()
+    {
+        _currentState = new FlatSurfaceState(CurrentTime, 
+                                            Mass, Position, Velocity, Acceleration,
+                                            Normal, Weight, _friction.SignedMagnitude,
+                                            _appliedForceX.SignedMagnitude, _appliedForceY.SignedMagnitude,
+                                            _fNetX.SignedMagnitude, _fNetY.SignedMagnitude);
+
+        return _currentState;
+    }
 }

@@ -1,5 +1,6 @@
 ﻿namespace PhysicsEngine.Scenarios;
 
+public abstract record ScenarioState();
 
 public abstract class Scenario
 {

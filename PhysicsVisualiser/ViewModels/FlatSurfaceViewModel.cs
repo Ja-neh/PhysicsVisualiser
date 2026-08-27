@@ -1,4 +1,4 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.Maui.Dispatching;
 using PhysicsEngine.Formulas;
@@ -13,8 +13,11 @@ namespace PhysicsVisualiser.ViewModels;
 
 public partial class FlatSurfaceViewModel : ObservableObject
 {
+    // Scenario
     private FlatSurface _flatScenario = new FlatSurface();
+    public FlatSurfaceState State { get; private set; }
 
+    // Time
     private const double _fixedTimeStep = 1.0 / 60.0; // 60 fps
     private double _accumulatedTime = 0.0;
 
@@ -146,6 +149,7 @@ public partial class FlatSurfaceViewModel : ObservableObject
         }
 
         _flatScenario.Restart();
+
         SyncViewWithSolver();
         RequestRepaint();
     }
@@ -171,21 +175,26 @@ public partial class FlatSurfaceViewModel : ObservableObject
     }
 
 
-    public FlatSurfaceViewModel() { }
+    public FlatSurfaceViewModel()
+    {
+        State = _flatScenario.GetCurrentState();
+    }
 
     private void SyncViewWithSolver()
     {
-        SolverCurrentTime = _flatScenario.CurrentTime;
-        SolverCurrentPosition = _flatScenario.Position;
-        SolverCurrentVelocity = _flatScenario.Velocity;
-        SolverCurrentAcceleration = _flatScenario.Acceleration;
-        SolverCurrentNormalForce = _flatScenario.Normal;
-        SolverCurrentFrictionForce = _flatScenario.Friction;
-        SolverCurrentWeight = _flatScenario.Weight;
-        SolverCurrentAppliedForceX = _flatScenario.AppliedForceX;
-        SolverCurrentAppliedForceY = _flatScenario.AppliedForceY;
-        SolverCurrentNetForceX = _flatScenario.FNetX;
-        SolverCurrentNetForceY = _flatScenario.FNetY;
+        State = _flatScenario.GetCurrentState();
+
+        SolverCurrentTime = State.Time;
+        SolverCurrentPosition = State.Position;
+        SolverCurrentVelocity = State.Velocity;
+        SolverCurrentNormalForce = State.Normal;
+        SolverCurrentFrictionForce = State.Friction;
+        SolverCurrentWeight = State.Weight;
+        SolverCurrentAcceleration = State.Acceleration;
+        SolverCurrentAppliedForceX = State.AppliedForceX;
+        SolverCurrentAppliedForceY = State.AppliedForceY;
+        SolverCurrentNetForceX = State.FNetX;
+        SolverCurrentNetForceY = State.FNetY;
     }
 
     public void RequestRepaint()

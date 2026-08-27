@@ -1,6 +1,7 @@
 ﻿using System;
 using SkiaSharp;
 using PhysicsVisualiser.ViewModels;
+using PhysicsEngine.Scenarios;
 
 namespace PhysicsVisualiser.Renderers;
 
@@ -30,7 +31,7 @@ public class FlatSurfaceRenderer
 #endif
 
 
-    public void Render(SKCanvas canvas, SKImageInfo info, FlatSurfaceViewModel vm)
+    public void Render(SKCanvas canvas, SKImageInfo info, FlatSurfaceState state)
     {
         // setup
         canvas.Clear(BgColor);
@@ -41,7 +42,7 @@ public class FlatSurfaceRenderer
         float originX = width * originXAdjustFactor;
         float originY = height * originYAdjustFactor;
 
-        float boxPosMeters = (float)vm.SolverCurrentPosition;
+        float boxPosMeters = (float)state.Position;
 
         // Grid
         DrawGrid(canvas, width, height, originX, originY);
@@ -55,7 +56,7 @@ public class FlatSurfaceRenderer
         float boxCenterX = surfaceContactX;
         float boxCenterY = surfaceContactY - (boxHeightPx / 2f);
 
-        DrawBox(canvas, boxCenterX, boxCenterY, boxWidthPx, boxHeightPx, vm.UserMass);
+        DrawBox(canvas, boxCenterX, boxCenterY, boxWidthPx, boxHeightPx, state.Mass);
 
         canvas.Restore();
     }
