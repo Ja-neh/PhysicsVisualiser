@@ -127,7 +127,7 @@
 
                         <!-- Friction Force -->
                         <Grid Grid.Row="5" ColumnDefinitions="*, Auto, Auto" ColumnSpacing="10">
-                            <Label Grid.Column="0" Text="Friction Force" TextColor="Black" FontAttributes="Bold" VerticalTextAlignment="Center" />
+                            <Label Grid.Column="0" Text="Kinetic Frictional Force" TextColor="Black" FontAttributes="Bold" VerticalTextAlignment="Center" />
                             <Label Grid.Column="1" 
                                Text="{Binding SolverCurrentFrictionForce, StringFormat='{0:F3}'}" TextColor="Black"
                                VerticalTextAlignment="Center" HorizontalTextAlignment="End" WidthRequest="100" />

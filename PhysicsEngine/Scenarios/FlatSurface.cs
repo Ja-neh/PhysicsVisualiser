@@ -80,6 +80,7 @@ public class FlatSurface : Scenario
 
     public double SurfaceInclination { get; set; }
     public double FrictionCoefficient { get; set; }
+
     public double Gravity { get; set; } = Constants.earthGravitationalAcceleration;
 
     // GET only to outside
@@ -128,9 +129,6 @@ public class FlatSurface : Scenario
 
     protected override void Initialize()   // To components 
     {
-        _appliedForceX.Magnitude = Forces.ForceAdjacent(AppliedForce, AppliedForceAngle);
-        _appliedForceY.Magnitude = Forces.ForceOpposite(AppliedForce, AppliedForceAngle);
-
         _appliedForceX.Magnitude = Forces.ForceAdjacent(AppliedForce, Math.Abs(AppliedForceAngle));
         if(AppliedForce < 0)
         {
@@ -148,7 +146,7 @@ public class FlatSurface : Scenario
     {
         CurrentTime = default;
         Position = 0.0;
-        Velocity = 0.0;
+        Velocity = InitialVelocity;
         Acceleration = 0.0;
         _fNetX.Magnitude = 0.0;
         _fNetX.Direction = DirectionXY.Xpositive;
@@ -179,27 +177,6 @@ public class FlatSurface : Scenario
         Weight = Forces.WeightPerpendicular(Mass, SurfaceInclination);
         Normal = Weight + _appliedForceY.SignedMagnitude;
 
-        // friction
-        _friction.Magnitude = Forces.Friction(FrictionCoefficient, Normal); 
-        if (_appliedForceX.Magnitude <= _friction.Magnitude)
-        {
-            Acceleration = 0.0;
-            Velocity = 0.0;
-        }
-        else
-        {
-            _friction.Direction = _appliedForceX.Direction.Negate();
-            //if(_previousVelocity < 0.0001)
-            //{
-            //    Acceleration = 0.0;
-            //    Velocity = 0.0;
-            //}
-        }
-
-        // fnetX
-        _fNetX.Magnitude = _appliedForceX.SignedMagnitude + _friction.SignedMagnitude;
-        _fNetX.Direction = _appliedForceX.Direction;
-
         // fnetY
         double tempMagnitude = _appliedForceY.SignedMagnitude + Weight + Normal;
         if (tempMagnitude < 0)
@@ -208,10 +185,67 @@ public class FlatSurface : Scenario
         }
         _fNetY.Magnitude = Math.Abs(tempMagnitude);
 
+        // friction magnitude
+        _friction.Magnitude = Forces.Friction(FrictionCoefficient, Normal);
+
+        // fnetX & friction direction
+        bool updatePosVelAcc = true;
+        if (_appliedForceX.Magnitude > _friction.Magnitude)
+        {
+            _fNetX.Direction = _appliedForceX.Direction;
+            _friction.Direction = _appliedForceX.Direction.Negate();
+
+            _fNetX.Magnitude = _appliedForceX.SignedMagnitude + _friction.SignedMagnitude;
+        }
+        else if(_appliedForceX.Magnitude < _friction.Magnitude)
+        {
+            if (Velocity == 0.0)        // no movement, no kinetic friction, no net force
+            {
+                _friction.Magnitude = 0.0;
+                _friction.Direction = DirectionXY.Xpositive;
+                _fNetX.Magnitude = 0.0;
+            }
+            else if (Velocity > 0.0)        // friction works against direction of motion
+            {
+                _friction.Direction = DirectionXY.Xnegative;
+                _fNetX.Direction = _friction.Direction;
+
+                _fNetX.Magnitude = _appliedForceX.SignedMagnitude + _friction.SignedMagnitude;
+            }
+            else if(Velocity < 0.0)
+            {
+                _friction.Direction = DirectionXY.Xpositive;
+                _fNetX.Direction = _friction.Direction;
+
+                _fNetX.Magnitude = _appliedForceX.SignedMagnitude + _friction.SignedMagnitude;
+            }
+
+            if(Math.Abs(Velocity) < 0.01)
+            {
+                _friction.Magnitude = 0.0;
+                _friction.Direction = DirectionXY.Xpositive;
+                _fNetX.Magnitude = 0.0;
+                Acceleration = 0.0;
+                Velocity = 0.0;
+                updatePosVelAcc = false;
+            }
+        }
+        else
+        {
+            _fNetX.Magnitude = _appliedForceX.SignedMagnitude + _friction.SignedMagnitude;
+            _fNetX.Direction = DirectionXY.Xpositive;
+            _friction.Direction = _appliedForceX.Direction.Negate();
+        }
+
+
         // x, v, a
-        Acceleration = _fNetX.SignedMagnitude / Mass;
-        Position = Motion.DisplacementUsingAcceleration(InitialVelocity, CurrentTime, Acceleration);
-        Velocity = Motion.FinalVelocity(InitialVelocity, Acceleration, CurrentTime);
+        if (updatePosVelAcc)
+        {
+            Acceleration = _fNetX.SignedMagnitude / Mass;
+            Position = Motion.DisplacementUsingAcceleration(InitialVelocity, CurrentTime, Acceleration);
+            Velocity = Motion.FinalVelocity(InitialVelocity, Acceleration, CurrentTime);
+        }
+        
         _previousVelocity = Velocity;
 
 
