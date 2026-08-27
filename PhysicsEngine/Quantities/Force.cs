@@ -14,9 +14,9 @@ internal static class DirectionXYExtensions
     public static DirectionXY Negate(this DirectionXY direction) => direction switch
     {
         DirectionXY.Xpositive => DirectionXY.Xnegative,
-        DirectionXY.Xnegative => DirectionXY.Ypositive,
+        DirectionXY.Xnegative => DirectionXY.Xpositive,
         DirectionXY.Ypositive => DirectionXY.Ynegative,
-        DirectionXY.Ynegative => DirectionXY.Xpositive,
+        DirectionXY.Ynegative => DirectionXY.Ypositive,
         _ => throw new ArgumentOutOfRangeException(nameof(direction), $"Not expected direction value: {direction}"), 
     };
 }
