@@ -65,6 +65,28 @@ public partial class FlatSurfaceViewModel : ObservableObject
     [ObservableProperty]
     public partial double SolverCurrentNetForceY { get; set; }
 
+    // Show toggles
+    [ObservableProperty]
+    public partial bool ShowForceVectors { get; set; }
+    [ObservableProperty]
+    public partial bool ShowVelocityVectors { get; set; }
+
+
+    #region TOGGLE TO RENDERER
+    partial void OnShowForceVectorsChanged(bool value)
+    {
+        Renderer.ShowForceVectors = value;
+        RequestRepaint();
+    }
+
+    partial void OnShowVelocityVectorsChanged(bool value)
+    {
+        Renderer.ShowVelocityVectors = value;
+        RequestRepaint();
+    }
+    #endregion
+
+
     #region INPUT TO SOLVER
     partial void OnUserMassChanged(double value)
     {
@@ -102,6 +124,7 @@ public partial class FlatSurfaceViewModel : ObservableObject
     // "On<...>IsChanging methods" for "User... properties" to check if solver IsRunning
     // if running, user be warned of sudden, "maybe" unexpected changes in current run
     #endregion
+
 
     #region SIMULATION CONTROL
     private IDispatcherTimer? _timer;
@@ -179,6 +202,7 @@ public partial class FlatSurfaceViewModel : ObservableObject
     public FlatSurfaceViewModel()
     {
         State = _flatScenario.GetCurrentState();
+        ShowForceVectors = Renderer.ShowForceVectors;
     }
 
     private void SyncViewWithSolver()

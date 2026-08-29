@@ -1,28 +1,33 @@
-using System;
-using SkiaSharp;
-using PhysicsVisualiser.ViewModels;
 using PhysicsEngine.Scenarios;
+using PhysicsVisualiser.ViewModels;
+using SkiaSharp;
+using System;
 
 namespace PhysicsVisualiser.Renderers;
 
 public class FlatSurfaceRenderer
 {
+    // PROPERTIES
+    #region TOGGLES
+    public bool ShowForceVectors { get; set; } = false;
+    public bool ShowVelocityVectors { get; set; } = false;
+    #endregion
 
     // FIELDS
     #region COLOURS
-    private static readonly SKColor BgColor = SKColors.White;
-    private static readonly SKColor GridColor = new SKColor(51, 65, 85, 90);
-    private static readonly SKColor AxisColor = new SKColor(100, 116, 139, 140);
+    private static readonly SKColor BgColour = SKColors.White;
+    private static readonly SKColor GridColour = new SKColor(51, 65, 85, 90);
+    private static readonly SKColor AxisColour = new SKColor(100, 116, 139, 140);
 
-    private static readonly SKColor BoxFillColor = new SKColor(79, 70, 229);
-    private static readonly SKColor BoxStrokeColor = new SKColor(165, 180, 252);
-    private static readonly SKColor BoxTextColor = SKColors.White;
+    private static readonly SKColor BoxFillColour = new SKColor(79, 70, 229);
+    private static readonly SKColor BoxStrokeColour = new SKColor(165, 180, 252);
+    private static readonly SKColor BoxTextColour = SKColors.White;
 
-    private static readonly SKColor ForceAppliedColor = new SKColor(239, 68, 68);
-    private static readonly SKColor ForceNormalColor = new SKColor(14, 165, 233);
-    private static readonly SKColor ForceWeightColor = new SKColor(234, 179, 8);
-    private static readonly SKColor ForceFrictionColor = new SKColor(168, 85, 247);
-    private static readonly SKColor VelocityColor = new SKColor(16, 185, 129);
+    private static readonly SKColor ForceAppliedColour = new SKColor(239, 68, 68);
+    private static readonly SKColor ForceNormalColour = new SKColor(14, 165, 233);
+    private static readonly SKColor ForceWeightColour = new SKColor(234, 179, 8);
+    private static readonly SKColor ForceFrictionColour = new SKColor(168, 85, 247);
+    private static readonly SKColor VelocityColour = new SKColor(16, 185, 129);
     #endregion
 
     #region VIEW(CAMERA, BOX) SETUP
@@ -47,7 +52,7 @@ public class FlatSurfaceRenderer
 
     public void Render(SKCanvas canvas, SKImageInfo info, FlatSurfaceState state)
     {
-        canvas.Clear(BgColor);
+        canvas.Clear(BgColour);
 
         float widthPx = info.Width;
         float heightPx = info.Height;
@@ -73,6 +78,10 @@ public class FlatSurfaceRenderer
 
         DrawBox(canvas, boxPositionXPx, boxPositionYPx, state.Mass);
 
+        // vectors
+        if (ShowForceVectors) DrawForceVectors(canvas, boxPositionXPx, boxPositionYPx, state);
+        
+        if (ShowVelocityVectors) DrawVelocityVectors(canvas, boxPositionXPx, boxPositionYPx, state);
 
         canvas.Restore();
         
@@ -90,7 +99,7 @@ public class FlatSurfaceRenderer
 
         using var gridPaint = new SKPaint
         {
-            Color = GridColor,
+            Color = GridColour,
             StrokeWidth = 1f,
             Style = SKPaintStyle.Stroke,
             IsAntialias = true
@@ -98,7 +107,7 @@ public class FlatSurfaceRenderer
 
         using var axisPaint = new SKPaint
         {
-            Color = AxisColor,
+            Color = AxisColour,
             StrokeWidth = 5f,
             Style = SKPaintStyle.Stroke,
             IsAntialias = true
@@ -144,14 +153,14 @@ public class FlatSurfaceRenderer
 
         using var boxFill = new SKPaint
         {
-            Color = BoxFillColor,
+            Color = BoxFillColour,
             Style = SKPaintStyle.Fill,
             IsAntialias = true
         };
 
         using var boxStroke = new SKPaint
         {
-            Color = BoxStrokeColor,
+            Color = BoxStrokeColour,
             StrokeWidth = 2.5f,
             Style = SKPaintStyle.Stroke,
             IsAntialias = true
@@ -159,7 +168,7 @@ public class FlatSurfaceRenderer
 
         using var textPaint = new SKPaint
         {
-            Color = BoxTextColor,
+            Color = BoxTextColour,
             IsAntialias = true
         };
 
@@ -172,6 +181,142 @@ public class FlatSurfaceRenderer
         canvas.DrawText($"{mass:0.0} kg", 0, 4, SKTextAlign.Center, font, textPaint);
 
         canvas.Restore();
+    }
+
+    private void DrawForceVectors(SKCanvas canvas, float centerX, float centerY, FlatSurfaceState state)
+    {
+        canvas.Save();
+        canvas.Translate(centerX, centerY);
+
+        int numForces = 0;
+
+        if (state.Normal != 0.0) numForces++;
+        if (state.Weight != 0.0) numForces++;
+        if (state.Friction != 0.0) numForces++;
+        if (state.FNetX != 0.0) numForces++;
+
+        float scale = 1.5f;
+        float lengthBudget = (float)numForces * ( scale * _boxWidthPx);
+
+        double forcesSum = Math.Abs(state.Normal) + Math.Abs(state.Weight) + Math.Abs(state.Friction) + Math.Abs(state.FNetX);
+
+        float normalPortion = (float)(state.Normal / forcesSum) * lengthBudget;
+        float weightPortion = (float)(state.Weight / forcesSum) * lengthBudget;
+        float frictionPortion = (float)(state.Friction / forcesSum) * lengthBudget;
+        
+        double appliedForce = Math.Sqrt( state.AppliedForceX * state.AppliedForceX + state.AppliedForceY * state.AppliedForceY );
+        float appliedForcePortion = (float)(appliedForce / forcesSum) * lengthBudget;
+
+        // Normal
+        if (state.Normal != 0.0)
+        {
+            float endX = 0f;
+            float endY = - normalPortion;
+            DrawArrow(canvas, endX, endY, ForceNormalColour, "N");
+        }
+
+        if (state.Weight != 0.0)
+        {
+            float endX = 0f;
+            float endY = Math.Abs(weightPortion);
+            DrawArrow(canvas, endX, endY, ForceWeightColour, "W");
+        }
+        
+        if (state.Friction != 0.0)
+        {
+            float endY = 0f;
+            float endX = frictionPortion;
+            DrawArrow(canvas, endX, endY, ForceFrictionColour, "f");
+        }
+
+        if (state.AppliedForceX != 0.0 || state.AppliedForceY != 0.0)
+        {
+            double componentsSum = Math.Abs(state.AppliedForceX) + Math.Abs(state.AppliedForceY);
+
+            float endX = (float)(state.AppliedForceX / componentsSum) * appliedForcePortion;
+            float endY = - (float)(state.AppliedForceY / componentsSum) * appliedForcePortion;
+            DrawArrow(canvas, endX, endY, ForceAppliedColour, "Fa");
+        }
+
+        canvas.Restore();
+    }
+
+    private void DrawVelocityVectors(SKCanvas canvas, float centerX, float centerY, FlatSurfaceState state)
+    {
+        canvas.Save();
+        canvas.Translate(centerX, centerY);
+
+        float scale = 1.2f;
+
+        if(state.Velocity != 0.0)
+        {
+            float endY = 0f;
+            float endX = (float)state.Velocity * scale * _boxWidthPx;
+            DrawArrow(canvas, endX, endY, VelocityColour, "vx");
+        }
+
+        canvas.Restore();
+    }
+
+    private void DrawArrow(SKCanvas canvas, float endX, float endY, SKColor color, string label)
+    {
+        // Arrow shaft
+        using var paint = new SKPaint
+        {
+            Color = color,
+            StrokeWidth = 3f,
+            Style = SKPaintStyle.Stroke,
+            StrokeCap = SKStrokeCap.Round,
+            IsAntialias = true
+        };
+
+        canvas.DrawLine(0, 0, endX, endY, paint);
+
+        // Arrow head
+        using var headPaint = new SKPaint
+        {
+            Color = color,
+            StrokeWidth = 5f,
+            Style = SKPaintStyle.Fill,
+            IsAntialias = true
+        };
+
+        float angle = MathF.Atan2(endY, endX);
+
+        float headLen = 12f;
+        float headAngle = MathF.PI / 6; // 30 degrees
+
+        float h1X = endX - headLen * MathF.Cos(angle - headAngle);
+        float h1Y = endY - headLen * MathF.Sin(angle - headAngle);
+
+        float h2X = endX - headLen * MathF.Cos(angle + headAngle);
+        float h2Y = endY - headLen * MathF.Sin(angle + headAngle);
+
+        using var headBuilder = new SKPathBuilder();
+        headBuilder.MoveTo(endX, endY);
+        headBuilder.LineTo(h1X, h1Y);
+        headBuilder.LineTo(h2X, h2Y);
+        headBuilder.Close();
+
+        using var headPath = headBuilder.Detach();
+        canvas.DrawPath(headPath, headPaint);
+
+        // Label
+        using var labelPaint = new SKPaint
+        {
+            Color = color,
+            IsAntialias = true
+        };
+
+        float fontSize = 15f;
+        using var labelFont = new SKFont(SKTypeface.Default, fontSize);
+        labelFont.Embolden = true;
+
+        float labelOffset = 18f;
+        float labelX = endX + labelOffset * MathF.Cos(angle);
+        float labelY = endY + labelOffset * MathF.Sin(angle);
+
+        canvas.DrawText(label, labelX, labelY, SKTextAlign.Center, labelFont, labelPaint);
     }
 
 }
