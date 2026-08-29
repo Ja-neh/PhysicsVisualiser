@@ -13,6 +13,7 @@ public record FlatSurfaceState(
     double Acceleration,
     double Normal,
     double Weight,
+    double FrictionCoefficient,
     double Friction,
     double AppliedForceX,
     double AppliedForceY,
@@ -250,7 +251,8 @@ public class FlatSurface : Scenario
     {
         _currentState = new FlatSurfaceState(CurrentTime, 
                                             Mass, Position, Velocity, Acceleration,
-                                            Normal, Weight, _friction.SignedMagnitude,
+                                            Normal, Weight, 
+                                            FrictionCoefficient ,_friction.SignedMagnitude,
                                             _appliedForceX.SignedMagnitude, _appliedForceY.SignedMagnitude,
                                             _fNetX.SignedMagnitude, _fNetY.SignedMagnitude);
 

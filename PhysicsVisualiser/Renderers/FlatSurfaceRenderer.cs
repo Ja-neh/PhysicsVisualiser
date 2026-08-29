@@ -197,8 +197,8 @@ public class FlatSurfaceRenderer
 
         float scale = 1.5f;
         float lengthBudget = (float)numForces * ( scale * _boxWidthPx);
-
-        double forcesSum = Math.Abs(state.Normal) + Math.Abs(state.Weight) + Math.Abs(state.Friction) + Math.Abs(state.FNetX);
+                                                                            //didn't use state.friction incase fk is 0 and fs must be drawn
+        double forcesSum = Math.Abs(state.Normal) + Math.Abs(state.Weight) + Math.Abs(state.Normal * state.FrictionCoefficient) + Math.Abs(state.FNetX);
 
         float normalPortion = (float)(state.Normal / forcesSum) * lengthBudget;
         float weightPortion = (float)(state.Weight / forcesSum) * lengthBudget;
@@ -221,12 +221,28 @@ public class FlatSurfaceRenderer
             float endY = Math.Abs(weightPortion);
             DrawArrow(canvas, endX, endY, ForceWeightColour, "W");
         }
-        
-        if (state.Friction != 0.0)
+
+
+        if (state.Friction != 0.0 && state.Velocity != 0)
         {
             float endY = 0f;
             float endX = frictionPortion;
-            DrawArrow(canvas, endX, endY, ForceFrictionColour, "f");
+            DrawArrow(canvas, endX, endY, ForceFrictionColour, "fk");
+        }
+        else
+        {
+            if(state.AppliedForceX != 0.0 && state.FrictionCoefficient != 0.0)
+            {
+                float endY = 0f;
+                float portion = (float)(state.Normal * state.FrictionCoefficient / forcesSum) * lengthBudget;
+                float endX = portion;
+                if (state.AppliedForceX > 0.0)
+                {
+                    endX = - endX;
+                }
+
+                DrawArrow(canvas, endX, endY, ForceFrictionColour, "fs");
+            }
         }
 
         if (state.AppliedForceX != 0.0 || state.AppliedForceY != 0.0)
@@ -260,6 +276,8 @@ public class FlatSurfaceRenderer
 
     private void DrawArrow(SKCanvas canvas, float endX, float endY, SKColor color, string label)
     {
+        var (scaledX, scaledY) = VectorScaler.ScaleVector(endX, endY);
+
         // Arrow shaft
         using var paint = new SKPaint
         {
@@ -270,7 +288,7 @@ public class FlatSurfaceRenderer
             IsAntialias = true
         };
 
-        canvas.DrawLine(0, 0, endX, endY, paint);
+        canvas.DrawLine(0, 0, scaledX, scaledY, paint);
 
         // Arrow head
         using var headPaint = new SKPaint
@@ -281,19 +299,19 @@ public class FlatSurfaceRenderer
             IsAntialias = true
         };
 
-        float angle = MathF.Atan2(endY, endX);
+        float angle = MathF.Atan2(scaledY, scaledX);
 
         float headLen = 12f;
         float headAngle = MathF.PI / 6; // 30 degrees
 
-        float h1X = endX - headLen * MathF.Cos(angle - headAngle);
-        float h1Y = endY - headLen * MathF.Sin(angle - headAngle);
+        float h1X = scaledX - headLen * MathF.Cos(angle - headAngle);
+        float h1Y = scaledY - headLen * MathF.Sin(angle - headAngle);
 
-        float h2X = endX - headLen * MathF.Cos(angle + headAngle);
-        float h2Y = endY - headLen * MathF.Sin(angle + headAngle);
+        float h2X = scaledX - headLen * MathF.Cos(angle + headAngle);
+        float h2Y = scaledY - headLen * MathF.Sin(angle + headAngle);
 
         using var headBuilder = new SKPathBuilder();
-        headBuilder.MoveTo(endX, endY);
+        headBuilder.MoveTo(scaledX, scaledY);
         headBuilder.LineTo(h1X, h1Y);
         headBuilder.LineTo(h2X, h2Y);
         headBuilder.Close();
@@ -313,8 +331,8 @@ public class FlatSurfaceRenderer
         labelFont.Embolden = true;
 
         float labelOffset = 18f;
-        float labelX = endX + labelOffset * MathF.Cos(angle);
-        float labelY = endY + labelOffset * MathF.Sin(angle);
+        float labelX = scaledX + labelOffset * MathF.Cos(angle);
+        float labelY = scaledY + labelOffset * MathF.Sin(angle);
 
         canvas.DrawText(label, labelX, labelY, SKTextAlign.Center, labelFont, labelPaint);
     }
