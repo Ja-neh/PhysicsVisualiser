@@ -149,6 +149,7 @@ public partial class FlatSurfaceViewModel : ObservableObject
         }
 
         _flatScenario.Restart();
+        Renderer.ResetCamera();
 
         SyncViewWithSolver();
         RequestRepaint();
