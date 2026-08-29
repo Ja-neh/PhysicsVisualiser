@@ -7,8 +7,10 @@ namespace PhysicsVisualiser.Renderers;
 
 public class FlatSurfaceRenderer
 {
-    // Colors
-    private static readonly SKColor BgColor = new SKColor(255, 255, 255);
+
+    // FIELDS
+    #region COLOURS
+    private static readonly SKColor BgColor = SKColors.White;
     private static readonly SKColor GridColor = new SKColor(51, 65, 85, 90);
     private static readonly SKColor AxisColor = new SKColor(100, 116, 139, 140);
 
@@ -16,15 +18,22 @@ public class FlatSurfaceRenderer
     private static readonly SKColor BoxStrokeColor = new SKColor(165, 180, 252);
     private static readonly SKColor BoxTextColor = SKColors.White;
 
-    // View configuration
+    private static readonly SKColor ForceAppliedColor = new SKColor(239, 68, 68);
+    private static readonly SKColor ForceNormalColor = new SKColor(14, 165, 233);
+    private static readonly SKColor ForceWeightColor = new SKColor(234, 179, 8);
+    private static readonly SKColor ForceFrictionColor = new SKColor(168, 85, 247);
+    private static readonly SKColor VelocityColor = new SKColor(16, 185, 129);
+    #endregion
+
+    #region VIEW(CAMERA, BOX) SETUP
     private const float _pixelsPerMeter = 100f;
 
-    private const float _gridOriginAdjustFactorX = 0.25f;
-    private const float _gridOriginAdjustFactorY = 0.75f;
+    private const float _gridOriginAdjustFactorX = 0.45f;
+    private const float _gridOriginAdjustFactorY = 0.65f;
 
     private float _cameraPosition = 0f;
     private float _cameraPx = 0f;
-    private const float _lerpFactor = 0.1f;
+    private const float _lerpFactor = 1f;
 
 #if ANDROID
     private const float _boxWidthPx = 45f;
@@ -33,6 +42,7 @@ public class FlatSurfaceRenderer
     private const float _boxWidthPx = 60f;
     private const float _boxHeightPx = 45f;
 #endif
+    #endregion
 
 
     public void Render(SKCanvas canvas, SKImageInfo info, FlatSurfaceState state)
@@ -44,24 +54,28 @@ public class FlatSurfaceRenderer
 
         float xAnchorPx = widthPx * _gridOriginAdjustFactorX;
         float yAnchorPx = heightPx * _gridOriginAdjustFactorY;
-
-        // Camera: lerp toward the box
-        float boxPosition = (float)state.Position;
-
-        _cameraPosition += (boxPosition - _cameraPosition) * _lerpFactor;
+        
+        float boxPositionX = (float)state.Position;
+        
+        // camera
+        _cameraPosition += (boxPositionX - _cameraPosition) * _lerpFactor;
         _cameraPx = _cameraPosition * _pixelsPerMeter;
 
-        // Apply camera transform
         canvas.Save();
-        canvas.Translate(xAnchorPx - _cameraPosition * _pixelsPerMeter, 0); 
+        canvas.Translate( - _cameraPx, 0);
 
-        DrawGrid(canvas, widthPx, xAnchorPx, yAnchorPx);
+        // grid
+        DrawGrid(canvas, xAnchorPx, yAnchorPx, heightPx);
 
-        float boxPx = boxPosition * _pixelsPerMeter;
-        float boxCenterYPx = yAnchorPx - (_boxHeightPx / 2f);
-        DrawBox(canvas, boxPx, boxCenterYPx, state.Mass);
+        // box
+        float boxPositionXPx = xAnchorPx + boxPositionX * _pixelsPerMeter;
+        float boxPositionYPx = yAnchorPx - (_boxHeightPx / 2f);
+
+        DrawBox(canvas, boxPositionXPx, boxPositionYPx, state.Mass);
+
 
         canvas.Restore();
+        
     }
 
     public void ResetCamera()
@@ -69,8 +83,11 @@ public class FlatSurfaceRenderer
         _cameraPosition = 0f;
     }
 
-    private void DrawGrid(SKCanvas canvas, float viewWidth, float anchorX, float groundY)
+    private void DrawGrid(SKCanvas canvas, float originX, float originY, float height)
     {
+        canvas.Save();
+        canvas.Translate(originX, originY);
+
         using var gridPaint = new SKPaint
         {
             Color = GridColor,
@@ -82,7 +99,7 @@ public class FlatSurfaceRenderer
         using var axisPaint = new SKPaint
         {
             Color = AxisColor,
-            StrokeWidth = 1.5f,
+            StrokeWidth = 5f,
             Style = SKPaintStyle.Stroke,
             IsAntialias = true
         };
@@ -95,25 +112,28 @@ public class FlatSurfaceRenderer
 
         using var font = new SKFont(SKTypeface.Default, 10f);
 
-        const float gridSpacing = 5f;
-        float leftWorldM = _cameraPosition - anchorX / _pixelsPerMeter;
-        float rightWorldM = _cameraPosition + (viewWidth - anchorX) / _pixelsPerMeter;
+        // meters
+        float leftLimit = - 100f;
+        float rightLimit = 100f;
+        float gridSpacing = 5f;
 
-        float startM = MathF.Floor(leftWorldM / gridSpacing) * gridSpacing;
-        float endM = MathF.Ceiling(rightWorldM / gridSpacing) * gridSpacing;
-
-        for (float meters = startM; meters <= endM; meters += gridSpacing)
+        for(float gridLine = leftLimit; gridLine <= rightLimit; gridLine += gridSpacing)
         {
-            float x = meters * _pixelsPerMeter;
-            canvas.DrawLine(x, 0, x, 2 * groundY, gridPaint);
+            float xPx = gridLine * _pixelsPerMeter;
 
-            canvas.DrawText($"{meters:0}m", x + 4, groundY + 20, SKTextAlign.Left, font, textPaint);
+            float upLength = height * _gridOriginAdjustFactorY;
+            float downLength = height * (1 - _gridOriginAdjustFactorY);
+            canvas.DrawLine(xPx, downLength, xPx, -upLength, gridPaint);
+
+            float rightOfGridLine = xPx + 4f;
+            float belowXAxis = 20f;
+            canvas.DrawText($"{gridLine}m", rightOfGridLine, belowXAxis, SKTextAlign.Left, font, textPaint);
         }
 
-        // Ground line
-        float groundLeft = (startM - 50) * _pixelsPerMeter;
-        float groundRight = (endM + 50) * _pixelsPerMeter;
-        canvas.DrawLine(groundLeft, groundY, groundRight, groundY, axisPaint);
+        canvas.DrawLine(leftLimit * _pixelsPerMeter, 0, rightLimit * _pixelsPerMeter, 0, axisPaint);
+
+        canvas.Restore();
+
     }
 
 
