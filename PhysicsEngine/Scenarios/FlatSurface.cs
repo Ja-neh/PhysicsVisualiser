@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using PhysicsEngine.Bodies;
 using PhysicsEngine.Formulas;
 using PhysicsEngine.Quantities;
@@ -187,7 +187,7 @@ public class FlatSurface : Scenario
         _friction.Magnitude = Forces.Friction(FrictionCoefficient, Normal);
 
         // fnetX & friction direction
-        bool updatePosVelAcc = true;
+        bool frictionDominates = false;
         if (_appliedForceX.Magnitude > _friction.Magnitude)
         {
             _fNetX.Direction = _appliedForceX.Direction;
@@ -218,15 +218,7 @@ public class FlatSurface : Scenario
                 _fNetX.Magnitude = _appliedForceX.SignedMagnitude + _friction.SignedMagnitude;
             }
 
-            if(Math.Abs(Velocity) < 0.01)
-            {
-                _friction.Magnitude = 0.0;
-                _friction.Direction = DirectionXY.Xpositive;
-                _fNetX.Magnitude = 0.0;
-                Acceleration = 0.0;
-                Velocity = 0.0;
-                updatePosVelAcc = false;
-            }
+            frictionDominates = true;
         }
         else
         {
@@ -237,11 +229,22 @@ public class FlatSurface : Scenario
 
 
         // x, v, a
-        if (updatePosVelAcc)
-        {
+        double previousVelocity = Velocity;
+
+        if (! (frictionDominates && Velocity == 0.0))
+        {   
             Acceleration = _fNetX.SignedMagnitude / Mass;
             Position = Motion.DisplacementUsingAcceleration(InitialVelocity, CurrentTime, Acceleration);
             Velocity = Motion.FinalVelocity(InitialVelocity, Acceleration, CurrentTime);
+        }
+
+        if (frictionDominates && previousVelocity * Velocity < 0)
+        {
+            Velocity = 0.0;
+            Acceleration = 0.0;
+            _friction.Magnitude = 0.0;
+            _friction.Direction = DirectionXY.Xpositive;
+            _fNetX.Magnitude = 0.0;
         }
 
     }
