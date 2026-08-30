@@ -52,4 +52,10 @@ internal class Force
         Direction = direction;
         Magnitude = magnitude;
     }
+
+    public Force()  // Don't forget to set your values later
+    {
+        Direction = DirectionXY.Xpositive;
+        Magnitude = 1.0;
+    }
 }

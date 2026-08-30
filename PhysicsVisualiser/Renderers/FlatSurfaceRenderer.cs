@@ -231,12 +231,12 @@ public class FlatSurfaceRenderer
         }
         else
         {
-            if(state.AppliedForceX != 0.0 && state.FrictionCoefficient != 0.0)
+            if(state.FNetX != 0.0 && state.FrictionCoefficient != 0.0)
             {
                 float endY = 0f;
                 float portion = (float)(state.Normal * state.FrictionCoefficient / forcesSum) * lengthBudget;
                 float endX = portion;
-                if (state.AppliedForceX > 0.0)
+                if (state.FNetX > 0.0)
                 {
                     endX = - endX;
                 }
