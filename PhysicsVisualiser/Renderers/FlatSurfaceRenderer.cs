@@ -192,19 +192,18 @@ public class FlatSurfaceRenderer
 
         if (state.Normal != 0.0) numForces++;
         if (state.Weight != 0.0) numForces++;
-        if (state.Friction != 0.0) numForces++;
-        if (state.FNetX != 0.0) numForces++;
+        if (state.MaxStaticFriction != 0.0) numForces++; // using MaxStaticFriction since it's always present when there is friction coefficient
+        if (state.AppliedForceX != 0.0 || state.AppliedForceY != 0.0) numForces++;
 
         float scale = 1.5f;
         float lengthBudget = (float)numForces * ( scale * _boxWidthPx);
-                                                                            //didn't use state.friction incase fk is 0 and fs must be drawn
-        double forcesSum = Math.Abs(state.Normal) + Math.Abs(state.Weight) + Math.Abs(state.Normal * state.FrictionCoefficient) + Math.Abs(state.FNetX);
+
+        double forcesSum = Math.Abs(state.Normal) + Math.Abs(state.Weight) + Math.Abs(state.MaxStaticFriction);
+        double appliedForce = Math.Sqrt(state.AppliedForceX * state.AppliedForceX + state.AppliedForceY * state.AppliedForceY);
+        forcesSum += appliedForce;
 
         float normalPortion = (float)(state.Normal / forcesSum) * lengthBudget;
         float weightPortion = (float)(state.Weight / forcesSum) * lengthBudget;
-        float frictionPortion = (float)(state.Friction / forcesSum) * lengthBudget;
-        
-        double appliedForce = Math.Sqrt( state.AppliedForceX * state.AppliedForceX + state.AppliedForceY * state.AppliedForceY );
         float appliedForcePortion = (float)(appliedForce / forcesSum) * lengthBudget;
 
         // Normal
@@ -223,26 +222,17 @@ public class FlatSurfaceRenderer
         }
 
 
-        if (state.Friction != 0.0 && state.Velocity != 0)
+        if (state.KineticFriction != 0.0)
         {
             float endY = 0f;
-            float endX = frictionPortion;
+            float endX = (float)(state.KineticFriction / forcesSum) * lengthBudget;
             DrawArrow(canvas, endX, endY, ForceFrictionColour, "fk");
         }
-        else
+        else if(state.StaticFriction != 0)
         {
-            if(state.FNetX != 0.0 && state.FrictionCoefficient != 0.0)
-            {
-                float endY = 0f;
-                float portion = (float)(state.Normal * state.FrictionCoefficient / forcesSum) * lengthBudget;
-                float endX = portion;
-                if (state.FNetX > 0.0)
-                {
-                    endX = - endX;
-                }
-
-                DrawArrow(canvas, endX, endY, ForceFrictionColour, "fs");
-            }
+            float endY = 0f;
+            float endX = (float)(state.StaticFriction / forcesSum) * lengthBudget;
+            DrawArrow(canvas, endX, endY, ForceFrictionColour, "fs");
         }
 
         if (state.AppliedForceX != 0.0 || state.AppliedForceY != 0.0)

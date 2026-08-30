@@ -97,7 +97,7 @@
                 <Grid Background="#F0F2F5" RowDefinitions="Auto, Auto, Auto" Padding="15">
 
                     <!-- realtime updates -->
-                    <Grid Grid.Row="0" RowDefinitions="*, *, *, *, *, *, *, *, *, *, *" RowSpacing="8">
+                    <Grid Grid.Row="0" RowDefinitions="*, *, *, *, *, *, *, *, *, *, *, *, *" RowSpacing="8">
                         <Label Grid.Row="0" Text="Updates:" TextColor="Black" FontSize="20" FontAttributes="Bold,Italic" Margin="0, 0, 0, 20"/>
 
                         <!-- PositionX -->
@@ -150,9 +150,31 @@
 
                         <!-- Friction Force -->
                         <Grid Grid.Row="5" ColumnDefinitions="*, Auto, Auto" ColumnSpacing="10">
+                            <Label Grid.Column="0" Text="Max Static Frictional Force" TextColor="Black" FontAttributes="Bold" VerticalTextAlignment="Center" />
+                            <Label Grid.Column="1" 
+                               Text="{Binding SolverCurrentMaxStaticFrictionForce, StringFormat='{0:F3}'}" TextColor="Black"
+                               VerticalTextAlignment="Center" HorizontalTextAlignment="End" WidthRequest="100" />
+                            <Border Grid.Column="2" StrokeShape="RoundRectangle 4" BackgroundColor="Black" Padding="0">
+                                <Label Text="N" TextColor="White" HeightRequest="35" WidthRequest="40" 
+                           HorizontalTextAlignment="Center" VerticalTextAlignment="Center" />
+                            </Border>
+                        </Grid>
+                        
+                        <Grid Grid.Row="6" ColumnDefinitions="*, Auto, Auto" ColumnSpacing="10">
+                            <Label Grid.Column="0" Text="Static Frictional Force" TextColor="Black" FontAttributes="Bold" VerticalTextAlignment="Center" />
+                            <Label Grid.Column="1" 
+                               Text="{Binding SolverCurrentStaticFrictionForce, StringFormat='{0:F3}'}" TextColor="Black"
+                               VerticalTextAlignment="Center" HorizontalTextAlignment="End" WidthRequest="100" />
+                            <Border Grid.Column="2" StrokeShape="RoundRectangle 4" BackgroundColor="Black" Padding="0">
+                                <Label Text="N" TextColor="White" HeightRequest="35" WidthRequest="40" 
+                           HorizontalTextAlignment="Center" VerticalTextAlignment="Center" />
+                            </Border>
+                        </Grid>
+                        
+                        <Grid Grid.Row="7" ColumnDefinitions="*, Auto, Auto" ColumnSpacing="10">
                             <Label Grid.Column="0" Text="Kinetic Frictional Force" TextColor="Black" FontAttributes="Bold" VerticalTextAlignment="Center" />
                             <Label Grid.Column="1" 
-                               Text="{Binding SolverCurrentFrictionForce, StringFormat='{0:F3}'}" TextColor="Black"
+                               Text="{Binding SolverCurrentKineticFrictionForce, StringFormat='{0:F3}'}" TextColor="Black"
                                VerticalTextAlignment="Center" HorizontalTextAlignment="End" WidthRequest="100" />
                             <Border Grid.Column="2" StrokeShape="RoundRectangle 4" BackgroundColor="Black" Padding="0">
                                 <Label Text="N" TextColor="White" HeightRequest="35" WidthRequest="40" 
@@ -161,7 +183,7 @@
                         </Grid>
 
                         <!-- WeightY -->
-                        <Grid Grid.Row="6" ColumnDefinitions="*, Auto, Auto" ColumnSpacing="10">
+                        <Grid Grid.Row="8" ColumnDefinitions="*, Auto, Auto" ColumnSpacing="10">
                             <Label Grid.Column="0" Text="Weight" TextColor="Black" FontAttributes="Bold" VerticalTextAlignment="Center" />
                             <Label Grid.Column="1" 
                                Text="{Binding SolverCurrentWeight, StringFormat='{0:F3}'}" TextColor="Black" 
@@ -173,7 +195,7 @@
                         </Grid>
 
                         <!-- Applied ForceX -->
-                        <Grid Grid.Row="7" ColumnDefinitions="*, Auto, Auto" ColumnSpacing="10">
+                        <Grid Grid.Row="9" ColumnDefinitions="*, Auto, Auto" ColumnSpacing="10">
                             <Label Grid.Column="0" Text="Applied ForceX" TextColor="Black" FontAttributes="Bold" VerticalTextAlignment="Center" />
                             <Label Grid.Column="1" 
                                 Text="{Binding SolverCurrentAppliedForceX, StringFormat='{0:F3}'}" TextColor="Black" 
@@ -185,7 +207,7 @@
                         </Grid>
 
                         <!-- Applied ForceY -->
-                        <Grid Grid.Row="8" ColumnDefinitions="*, Auto, Auto" ColumnSpacing="10">
+                        <Grid Grid.Row="10" ColumnDefinitions="*, Auto, Auto" ColumnSpacing="10">
                             <Label Grid.Column="0" Text="Applied ForceY" TextColor="Black" FontAttributes="Bold" VerticalTextAlignment="Center" />
                             <Label Grid.Column="1" 
                                 Text="{Binding SolverCurrentAppliedForceY, StringFormat='{0:F3}'}" TextColor="Black" 
@@ -197,7 +219,7 @@
                         </Grid>
 
                         <!-- Net ForceX -->
-                        <Grid Grid.Row="9" ColumnDefinitions="*, Auto, Auto" ColumnSpacing="10">
+                        <Grid Grid.Row="11" ColumnDefinitions="*, Auto, Auto" ColumnSpacing="10">
                             <Label Grid.Column="0" Text="Net ForceX" TextColor="Black" FontAttributes="Bold" VerticalTextAlignment="Center" />
                             <Label Grid.Column="1" 
                                Text="{Binding SolverCurrentNetForceX, StringFormat='{0:F3}'}" TextColor="Black" 
@@ -209,7 +231,7 @@
                         </Grid>
 
                         <!-- Net ForceY -->
-                        <Grid Grid.Row="10" ColumnDefinitions="*, Auto, Auto" ColumnSpacing="10">
+                        <Grid Grid.Row="12" ColumnDefinitions="*, Auto, Auto" ColumnSpacing="10">
                             <Label Grid.Column="0" Text="Net ForceY" TextColor="Black" FontAttributes="Bold" VerticalTextAlignment="Center" />
                             <Label Grid.Column="1" 
                                 Text="{Binding SolverCurrentNetForceY, StringFormat='{0:F3}'}" TextColor="Black" 

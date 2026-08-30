@@ -14,8 +14,9 @@ public record FlatSurfaceState(
     double Normal,
     double Weight,
     double FrictionCoefficient,
+    double MaxStaticFriction,
     double StaticFriction,
-    double Friction,
+    double KineticFriction,
     double AppliedForceX,
     double AppliedForceY,
     double FNetX,
@@ -28,12 +29,11 @@ public class FlatSurface : Scenario
 {
     private readonly Box box = new Box();
 
-    #region PUBLIC PROPERTIES
-    public double CurrentTime { get; private set; }
 
+    #region PUBLIC PROPERTIES
     public double Mass
     {
-        get => box.Mass;
+        private get => box.Mass;
         set
         {
             box.Mass = value;
@@ -42,19 +42,58 @@ public class FlatSurface : Scenario
 
     public double InitialVelocity
     {
-        get => box.InitialVelocityX;
+        private get => box.InitialVelocityX;
         set
         {
             box.InitialVelocityX = value;
         }
     }
 
-    public double AppliedForce { get; set; }
-    public double AppliedForceAngle { get; set; }
+
+    private double _appliedForce;
+    public double AppliedForce
+    {
+        get => _appliedForce;
+        set
+        {
+            _appliedForce = value;
+            OnAppliedForceChanges();
+        }
+    }
+
+    private double _appliedForceAngle;
+    public double AppliedForceAngle
+    {
+        get => _appliedForceAngle;
+        set
+        {
+            _appliedForceAngle = value;
+            OnAppliedForceChanges();
+        }
+    }
+
 
     public double FrictionCoefficient { get; set; }
 
     public double Gravity { get; set; } = Constants.earthGravitationalAcceleration;
+    #endregion
+
+
+    #region ON APPLIED FORCE CHANGES
+    private void OnAppliedForceChanges()   // To components 
+    {
+        _appliedForceX.Magnitude = Forces.ForceAdjacent(AppliedForce, Math.Abs(AppliedForceAngle));
+        if (AppliedForce < 0)
+        {
+            _appliedForceX.Direction = DirectionXY.Xnegative;
+        }
+
+        _appliedForceY.Magnitude = Forces.ForceOpposite(AppliedForce, Math.Abs(AppliedForceAngle));
+        if (AppliedForceAngle < 0)
+        {
+            _appliedForceY.Direction = DirectionXY.Ynegative;
+        }
+    }
     #endregion
 
 
@@ -121,33 +160,26 @@ public class FlatSurface : Scenario
     private FlatSurfaceState? _currentState;
 
     private const double _surfaceInclination = 0.0;
+
+    private double _elapsedTime;
+
+    private bool _simulationStopped = false;
     #endregion
 
 
     public FlatSurface() {}
 
 
-    protected override void Initialize()   // To components 
-    {
-        _appliedForceX.Magnitude = Forces.ForceAdjacent(AppliedForce, Math.Abs(AppliedForceAngle));
-        if(AppliedForce < 0)
-        {
-            _appliedForceX.Direction = DirectionXY.Xnegative;
-        }
-
-        _appliedForceY.Magnitude = Forces.ForceOpposite(AppliedForce, Math.Abs(AppliedForceAngle));
-        if(AppliedForceAngle < 0)
-        {
-            _appliedForceY.Direction = DirectionXY.Ynegative;
-        }
-    }
-
     public void Restart()
     {
-        CurrentTime = default;
+        _simulationStopped = false;
+        _elapsedTime = default;
 
         Position = 0.0;
-        Velocity = InitialVelocity;
+
+        double temp = InitialVelocity;
+        Velocity = temp;
+
         Acceleration = 0.0;
         _fNetX.Magnitude = 0.0;
         _fNetX.Direction = DirectionXY.Xpositive;
@@ -155,11 +187,15 @@ public class FlatSurface : Scenario
         _fNetY.Direction = DirectionXY.Ypositive;
     }
 
-    public void Reset()
+    public void Reset() // not used
     {
-        CurrentTime = default;
+        _elapsedTime = default;
+
         Mass = 0.0;
-        InitialVelocity = 0.0;
+
+        double temp = InitialVelocity;
+        Velocity = temp;
+
         Position = 0.0;
         Velocity = 0.0;
         Acceleration = 0.0;
@@ -170,9 +206,9 @@ public class FlatSurface : Scenario
 
     public override void Update(double delta)   // using TotalTime instead of small deltas in calculations
     {                                               // to avoid double inaccuracy compounding over time
-        if (CurrentTime == default) Initialize();
-
-        CurrentTime += delta;
+        if(_simulationStopped) return;
+        
+        _elapsedTime += delta;
 
         // weight & normal
         Weight = Forces.WeightPerpendicular(Mass, _surfaceInclination);
@@ -187,7 +223,6 @@ public class FlatSurface : Scenario
         _fNetY.Magnitude = Math.Abs(tempMagnitude);
 
         // friction magnitude
-        _staticFriction.Magnitude = Forces.Friction(FrictionCoefficient, Normal);
         _kineticFriction.Magnitude = Forces.Friction(FrictionCoefficient, Normal);
         _maxStaticFriction.Magnitude = Forces.Friction(FrictionCoefficient, Normal);
 
@@ -242,6 +277,9 @@ public class FlatSurface : Scenario
             
             if(_maxStaticFriction.Magnitude < _appliedForceX.Magnitude)      // Fa > fmax
             {
+                _staticFriction.Magnitude = 0.0;
+                _staticFriction.Direction = DirectionXY.Xpositive;
+
                 _kineticFriction.Direction = _appliedForceX.Direction.Negate();
 
                 _fNetX.Magnitude = _appliedForceX.SignedMagnitude + _kineticFriction.SignedMagnitude;
@@ -255,27 +293,49 @@ public class FlatSurface : Scenario
         if (updateAPV)
         {
             Acceleration = _fNetX.SignedMagnitude / Mass;
-            Position = Motion.DisplacementUsingAcceleration(InitialVelocity, CurrentTime, Acceleration);
-            Velocity = Motion.FinalVelocity(InitialVelocity, Acceleration, CurrentTime);
+            Position = Motion.DisplacementUsingAcceleration(InitialVelocity, _elapsedTime, Acceleration);
+            Velocity = Motion.FinalVelocity(InitialVelocity, Acceleration, _elapsedTime);
         }    
 
         if (previousVelocity * Velocity < 0.0)
         {
+            _simulationStopped = true;
+
             Velocity = 0.0;
+
+            _elapsedTime = default;
             Acceleration = 0.0;
 
-            _fNetX.Magnitude = 0.0;
             _kineticFriction.Magnitude = 0.0;
             _staticFriction.Magnitude = 0.0;
 
-            _fNetX.Direction = DirectionXY.Xpositive;
             _kineticFriction.Direction = DirectionXY.Xpositive;
             _staticFriction.Direction = DirectionXY.Xpositive;
 
             if (_appliedForceX.Magnitude != 0.0)
             {
-                _staticFriction.Magnitude = _appliedForceX.Magnitude;
-                _staticFriction.Direction = _appliedForceX.Direction.Negate();               
+                if(_maxStaticFriction.Magnitude >= _appliedForceX.Magnitude)
+                {
+                    _kineticFriction.Magnitude = 0.0;
+                    _kineticFriction.Direction = DirectionXY.Xpositive;
+
+                    _staticFriction.Magnitude = _appliedForceX.Magnitude;
+                    _staticFriction.Direction = _appliedForceX.Direction.Negate();
+
+                    _fNetX.Magnitude = 0.0;
+                    _fNetX.Direction = DirectionXY.Xpositive;
+                }
+                else
+                {
+                    _kineticFriction.Magnitude = Forces.Friction(FrictionCoefficient, Normal);
+                    _kineticFriction.Direction = _appliedForceX.Direction.Negate();
+
+                    _staticFriction.Magnitude = _maxStaticFriction.Magnitude;
+                    _staticFriction.Direction = _appliedForceX.Direction.Negate();
+
+                    _fNetX.Magnitude = _appliedForceX.SignedMagnitude + _kineticFriction.SignedMagnitude;
+                    _fNetX.Direction = _appliedForceX.Direction;
+                }            
             }
         }
 
@@ -284,10 +344,10 @@ public class FlatSurface : Scenario
 
     public FlatSurfaceState GetCurrentState()
     {
-        _currentState = new FlatSurfaceState(CurrentTime, 
+        _currentState = new FlatSurfaceState(_elapsedTime, 
                                             Mass, Position, Velocity, Acceleration,
                                             Normal, Weight, FrictionCoefficient,
-                                            _staticFriction.SignedMagnitude ,_kineticFriction.SignedMagnitude,
+                                            _maxStaticFriction.SignedMagnitude, _staticFriction.SignedMagnitude ,_kineticFriction.SignedMagnitude,
                                             _appliedForceX.SignedMagnitude, _appliedForceY.SignedMagnitude,
                                             _fNetX.SignedMagnitude, _fNetY.SignedMagnitude);
 

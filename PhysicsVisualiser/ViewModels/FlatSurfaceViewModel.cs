@@ -53,7 +53,11 @@ public partial class FlatSurfaceViewModel : ObservableObject
     [ObservableProperty]
     public partial double SolverCurrentNormalForce { get; set; }
     [ObservableProperty]
-    public partial double SolverCurrentFrictionForce { get; set; }
+    public partial double SolverCurrentMaxStaticFrictionForce { get; set; }
+    [ObservableProperty]
+    public partial double SolverCurrentStaticFrictionForce { get; set; }
+    [ObservableProperty]
+    public partial double SolverCurrentKineticFrictionForce { get; set; }
     [ObservableProperty]
     public partial double SolverCurrentWeight { get; set; }
     [ObservableProperty]
@@ -203,6 +207,7 @@ public partial class FlatSurfaceViewModel : ObservableObject
     {
         State = _flatScenario.GetCurrentState();
         ShowForceVectors = Renderer.ShowForceVectors;
+        ShowVelocityVectors = Renderer.ShowVelocityVectors;
     }
 
     private void SyncViewWithSolver()
@@ -213,7 +218,9 @@ public partial class FlatSurfaceViewModel : ObservableObject
         SolverCurrentPosition = State.Position;
         SolverCurrentVelocity = State.Velocity;
         SolverCurrentNormalForce = State.Normal;
-        SolverCurrentFrictionForce = State.Friction;
+        SolverCurrentMaxStaticFrictionForce = State.MaxStaticFriction;
+        SolverCurrentStaticFrictionForce = State.StaticFriction;
+        SolverCurrentKineticFrictionForce = State.KineticFriction;
         SolverCurrentWeight = State.Weight;
         SolverCurrentAcceleration = State.Acceleration;
         SolverCurrentAppliedForceX = State.AppliedForceX;
