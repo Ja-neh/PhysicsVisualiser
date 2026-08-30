@@ -303,7 +303,6 @@ public class FlatSurface : Scenario
 
             Velocity = 0.0;
 
-            _elapsedTime = default;
             Acceleration = 0.0;
 
             _kineticFriction.Magnitude = 0.0;
@@ -316,9 +315,6 @@ public class FlatSurface : Scenario
             {
                 if(_maxStaticFriction.Magnitude >= _appliedForceX.Magnitude)
                 {
-                    _kineticFriction.Magnitude = 0.0;
-                    _kineticFriction.Direction = DirectionXY.Xpositive;
-
                     _staticFriction.Magnitude = _appliedForceX.Magnitude;
                     _staticFriction.Direction = _appliedForceX.Direction.Negate();
 
