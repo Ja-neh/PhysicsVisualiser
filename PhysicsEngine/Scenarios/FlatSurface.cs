@@ -26,6 +26,7 @@ public record FlatSurfaceState(
 
 public record FlatSurfaceSegment(
     double ElapsedTime,
+    double StartPosition,
     double InitialVelocity,
     double FinalVelocity,
     double Acceleration
@@ -172,6 +173,8 @@ public class FlatSurface : Scenario
     private double _segmentElapsedTime;
     private double _totalElapsedTime;
 
+    private double _firstInitialVelocityForRun;
+    private double _segmentStartPosition;
     #endregion
 
 
@@ -184,9 +187,21 @@ public class FlatSurface : Scenario
         _totalElapsedTime = default;
 
         Position = 0.0;
+        _segmentStartPosition = Position;
 
-        double temp = InitialVelocity;
-        Velocity = temp;
+        if(InitialVelocity == _firstInitialVelocityForRun)
+        {
+            InitialVelocity = _firstInitialVelocityForRun;
+        }
+        else if(Segments.Count != 0)
+        {
+            InitialVelocity = _firstInitialVelocityForRun;
+            Segments.Clear();
+        }
+        else
+        {
+            Velocity = InitialVelocity;
+        }
 
         Acceleration = 0.0;
         _fNetX.Magnitude = 0.0;
@@ -214,6 +229,11 @@ public class FlatSurface : Scenario
 
     public override void Update(double delta)   // using TotalTime instead of small deltas in calculations
     {                                               // to avoid double inaccuracy compounding over time
+
+        if(_totalElapsedTime == 0.0)
+        {
+            _firstInitialVelocityForRun = InitialVelocity;
+        }
 
         _segmentElapsedTime += delta;
         _totalElapsedTime += delta;
@@ -301,13 +321,12 @@ public class FlatSurface : Scenario
         if (updateAPV)
         {
             Acceleration = _fNetX.SignedMagnitude / Mass;
-            Position = Motion.DisplacementUsingAcceleration(InitialVelocity, _segmentElapsedTime, Acceleration);
+            Position = _segmentStartPosition + Motion.DisplacementUsingAcceleration(InitialVelocity, _segmentElapsedTime, Acceleration);
             Velocity = Motion.FinalVelocity(InitialVelocity, Acceleration, _segmentElapsedTime);
         }    
 
         if (previousVelocity * Velocity < 0.0)      // segment change
         {
-            _simulationStopped = true;
 
             _kineticFriction.Magnitude = 0.0;
             _kineticFriction.Direction = DirectionXY.Xpositive;
@@ -334,7 +353,7 @@ public class FlatSurface : Scenario
 
             // saving current segment and preparing next
             double finalVelocity = 0.0;
-            FlatSurfaceSegment segment = new FlatSurfaceSegment(_segmentElapsedTime, InitialVelocity, finalVelocity, Acceleration);
+            FlatSurfaceSegment segment = new FlatSurfaceSegment(_segmentElapsedTime, Position, InitialVelocity, finalVelocity, Acceleration);
             Segments.Add(segment);
 
             if(_fNetX.Magnitude == 0.0)
@@ -343,6 +362,7 @@ public class FlatSurface : Scenario
             }
 
             _segmentElapsedTime = default;
+            _segmentStartPosition = Position;
             InitialVelocity = 0.0;
         }
     }
