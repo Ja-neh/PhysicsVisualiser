@@ -3,11 +3,11 @@
 
 public static class Constants
 {
-    public const double universalGravitationalConstant = 6.67e-11;
+    public const double UniversalGravitationalConstant = 6.67e-11;
 
-    public const double earthMass = 5.98e24;
+    public const double EarthMass = 5.98e24;
 
-    public const double earthRadius = 6.38e6;
+    public const double EarthRadius = 6.38e6;
 
-    public const double earthGravitationalAcceleration = 9.8;
+    public const double EarthGravitationalAcceleration = 9.8;
 }

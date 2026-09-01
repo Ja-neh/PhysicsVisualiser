@@ -42,12 +42,12 @@ public static class Forces
 
     public static double WeightParallel(double mass, double angle)
     {
-        return mass * Constants.earthGravitationalAcceleration * Math.Sin(angle);
+        return mass * Constants.EarthGravitationalAcceleration * Math.Sin(angle);
     }
 
     public static double WeightPerpendicular(double mass, double angle)
     {
-        return mass * Constants.earthGravitationalAcceleration * Math.Cos(angle);
+        return mass * Constants.EarthGravitationalAcceleration * Math.Cos(angle);
     }
 
     public static double ForceAdjacent(double force, double angle)

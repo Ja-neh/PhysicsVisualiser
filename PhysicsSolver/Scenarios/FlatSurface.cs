@@ -84,7 +84,7 @@ public class FlatSurface : Scenario
 
     public double FrictionCoefficient { get; set; }
 
-    public double Gravity { get; set; } = Constants.earthGravitationalAcceleration;
+    public double Gravity { get; set; } = Constants.EarthGravitationalAcceleration;
     #endregion
 
 
