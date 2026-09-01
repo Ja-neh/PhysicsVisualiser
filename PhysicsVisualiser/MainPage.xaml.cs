@@ -96,6 +96,8 @@ public partial class MainPage : ContentPage
             canvas.Scale(scaleX, scaleY);
 
             ViewModel.Renderer.Render(canvas, new SKImageInfo((int)SkiaCanvasView.Width, (int)SkiaCanvasView.Height), ViewModel.State);
+
+            canvas.Restore();
         }
     }
 }
