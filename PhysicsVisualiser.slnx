@@ -1,5 +1,6 @@
 <Solution>
   <Project Path="ConsoleTests/ConsoleTests.csproj" Id="e227c074-4a02-4a66-94a5-7ec5f9cb016f" />
+  <Project Path="PhysicsSolver.Tests/PhysicsSolver.Tests.csproj" Id="9cc72900-4e56-433c-aeae-6ad96ac3eb09" />
   <Project Path="PhysicsSolver/PhysicsSolver.csproj" />
   <Project Path="PhysicsVisualiser/PhysicsVisualiser.csproj">
     <Deploy Solution="Debug|*" />

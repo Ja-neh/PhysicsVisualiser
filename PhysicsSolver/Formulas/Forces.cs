@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 
 namespace PhysicsSolver.Formulas;
 
@@ -32,12 +32,12 @@ public static class Forces
 
     public static double GravitationalForce(double massOne, double massTwo, double radius)
     {
-        return (Constants.universalGravitationalConstant * massOne * massTwo) * ( 1 / Math.Pow(radius, 2) );
+        return (Constants.UniversalGravitationalConstant * massOne * massTwo) * ( 1 / Math.Pow(radius, 2) );
     }
 
     public static double GravitationalAcceleration(double mass, double radius)
     {
-        return (Constants.universalGravitationalConstant * mass) * ( 1 / Math.Pow(radius, 2) );
+        return (Constants.UniversalGravitationalConstant * mass) * ( 1 / Math.Pow(radius, 2) );
     }
 
     public static double WeightParallel(double mass, double angle)
