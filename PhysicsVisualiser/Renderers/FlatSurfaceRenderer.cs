@@ -1,4 +1,4 @@
-using PhysicsEngine.Scenarios;
+using PhysicsSolver.Scenarios;
 using PhysicsVisualiser.ViewModels;
 using SkiaSharp;
 using System;

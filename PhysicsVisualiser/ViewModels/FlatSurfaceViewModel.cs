@@ -1,8 +1,8 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.Maui.Dispatching;
-using PhysicsEngine.Formulas;
-using PhysicsEngine.Scenarios;
+using PhysicsSolver.Formulas;
+using PhysicsSolver.Scenarios;
 using PhysicsVisualiser.Renderers;
 using System;
 using System.ComponentModel;

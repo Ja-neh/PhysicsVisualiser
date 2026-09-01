@@ -1,4 +1,4 @@
-﻿namespace PhysicsEngine;
+﻿namespace PhysicsSolver;
 
 
 public static class Constants

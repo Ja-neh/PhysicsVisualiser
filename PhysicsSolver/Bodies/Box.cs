@@ -1,4 +1,4 @@
-﻿namespace PhysicsEngine.Bodies;
+﻿namespace PhysicsSolver.Bodies;
 
 
 internal class Box : PhysicsBody

@@ -73,7 +73,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<ProjectReference Include="..\PhysicsEngine\PhysicsEngine.csproj" />
+		<ProjectReference Include="..\PhysicsSolver\PhysicsSolver.csproj" />
 	</ItemGroup>
 
 </Project>

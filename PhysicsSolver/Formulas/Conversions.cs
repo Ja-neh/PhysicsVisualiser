@@ -1,4 +1,4 @@
-﻿namespace PhysicsEngine.Formulas;
+﻿namespace PhysicsSolver.Formulas;
 
 public static class Conversions
 {

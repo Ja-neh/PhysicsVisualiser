@@ -1,9 +1,9 @@
 using System;
-using PhysicsEngine.Bodies;
-using PhysicsEngine.Formulas;
-using PhysicsEngine.Quantities;
+using PhysicsSolver.Bodies;
+using PhysicsSolver.Formulas;
+using PhysicsSolver.Quantities;
 
-namespace PhysicsEngine.Scenarios;
+namespace PhysicsSolver.Scenarios;
 
 public record FlatSurfaceState(
     double Time,

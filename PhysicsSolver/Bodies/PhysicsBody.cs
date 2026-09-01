@@ -1,6 +1,6 @@
-﻿using PhysicsEngine.Quantities;
+﻿using PhysicsSolver.Quantities;
 
-namespace PhysicsEngine.Bodies;
+namespace PhysicsSolver.Bodies;
 
 
 internal abstract class PhysicsBody

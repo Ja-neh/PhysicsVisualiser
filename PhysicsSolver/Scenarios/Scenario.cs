@@ -1,4 +1,4 @@
-﻿namespace PhysicsEngine.Scenarios;
+﻿namespace PhysicsSolver.Scenarios;
 
 public abstract record ScenarioState();
 

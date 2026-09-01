@@ -1,8 +1,8 @@
 ﻿using System;
 
-using PhysicsEngine;
-using PhysicsEngine.Scenarios;
-using PhysicsEngine.Bodies;
+using PhysicsSolver;
+using PhysicsSolver.Scenarios;
+using PhysicsSolver.Bodies;
 
 
 namespace ConsoleTests;

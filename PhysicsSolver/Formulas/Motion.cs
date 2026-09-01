@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace PhysicsEngine.Formulas;
+namespace PhysicsSolver.Formulas;
 
 
 public static class Motion

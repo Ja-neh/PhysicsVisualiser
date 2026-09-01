@@ -1,4 +1,4 @@
-﻿namespace PhysicsEngine.Quantities;
+﻿namespace PhysicsSolver.Quantities;
 
 
 internal enum DirectionXY
