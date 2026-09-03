@@ -127,28 +127,62 @@ public class ForcesTests
 
     #region WeightParallel / WeightPerpendicular
     [Fact]
+    public void WeightParallel_DefaultsToEarthGravitationalAcceleration()
+    {
+        double mass = 6.0;
+        double angle = Math.PI / 6.0;
+
+        double withDefault = Forces.WeightParallel(mass, angle);
+        double withExplicitEarth = Forces.WeightParallel(mass, angle, Constants.EarthGravitationalAcceleration);
+
+        withDefault.Should().BeApproximately(withExplicitEarth, Precision);
+    }
+
+    [Fact]
+    public void WeightPerpendicular_DefaultsToEarthGravitationalAcceleration()
+    {
+        double mass = 6.0;
+        double angle = Math.PI / 6.0;
+
+        double withDefault = Forces.WeightPerpendicular(mass, angle);
+        double withExplicitEarth = Forces.WeightPerpendicular(mass, angle, Constants.EarthGravitationalAcceleration);
+
+        withDefault.Should().BeApproximately(withExplicitEarth, Precision);
+    }
+
+    [Fact]
     public void WeightParallel_ZeroAngle_ReturnsZero()
     {
-        // sin(x) = 0   - no parallel component on flat surface
+        // sin(0) = 0   - no parallel component on flat surface
         Forces.WeightParallel(10.0, 0.0).Should().BeApproximately(0.0, Precision);
+        Forces.WeightParallel(10.0, 0.0, Constants.MoonGravitationalAcceleration).Should().BeApproximately(0.0, Precision);
+        Forces.WeightParallel(10.0, 0.0, Constants.MarsGravitationalAcceleration).Should().BeApproximately(0.0, Precision);
     }
 
     [Fact]
     public void WeightPerpendicular_ZeroAngle_ReturnsFullWeight()
     {
-        // cos(x) = 1   - full weight perpendicular on flat surface
-        double expected = 10.0 * Constants.EarthGravitationalAcceleration;
-        Forces.WeightPerpendicular(10.0, 0.0).Should().BeApproximately(expected, Precision);
+        // cos(0) = 1   - full weight perpendicular on flat surface
+        double mass = 10.0;
+        double expectedEarth = mass * Constants.EarthGravitationalAcceleration;
+        double expectedMoon = mass * Constants.MoonGravitationalAcceleration;
+        double expectedMars = mass * Constants.MarsGravitationalAcceleration;
+
+        Forces.WeightPerpendicular(mass, 0.0).Should().BeApproximately(expectedEarth, Precision);
+        Forces.WeightPerpendicular(mass, 0.0, Constants.MoonGravitationalAcceleration).Should().BeApproximately(expectedMoon, Precision);
+        Forces.WeightPerpendicular(mass, 0.0, Constants.MarsGravitationalAcceleration).Should().BeApproximately(expectedMars, Precision);
     }
 
     [Fact]
     public void WeightParallel_90Degrees_ReturnsFullWeight()
     {
         // sin(PI/2) = 1    - vertical surface, all weight is parallel
+        double mass = 5.0;
         double angle = Math.PI / 2.0;
-        double expected = 5.0 * Constants.EarthGravitationalAcceleration;
 
-        Forces.WeightParallel(5.0, angle).Should().BeApproximately(expected, Precision);
+        Forces.WeightParallel(mass, angle).Should().BeApproximately(mass * Constants.EarthGravitationalAcceleration, Precision);
+        Forces.WeightParallel(mass, angle, Constants.MoonGravitationalAcceleration).Should().BeApproximately(mass * Constants.MoonGravitationalAcceleration, Precision);
+        Forces.WeightParallel(mass, angle, Constants.MarsGravitationalAcceleration).Should().BeApproximately(mass * Constants.MarsGravitationalAcceleration, Precision);
     }
 
     [Fact]
@@ -156,47 +190,85 @@ public class ForcesTests
     {
         // cos(PI/2) = 0
         double angle = Math.PI / 2.0;
+
         Forces.WeightPerpendicular(5.0, angle).Should().BeApproximately(0.0, Precision);
+        Forces.WeightPerpendicular(5.0, angle, Constants.MoonGravitationalAcceleration).Should().BeApproximately(0.0, Precision);
+        Forces.WeightPerpendicular(5.0, angle, Constants.MarsGravitationalAcceleration).Should().BeApproximately(0.0, Precision);
     }
 
-    [Fact]
-    public void WeightComponents_45Degrees_AreEqual()
+    [Theory]
+    [InlineData(Constants.EarthGravitationalAcceleration)]
+    [InlineData(Constants.MoonGravitationalAcceleration)]
+    [InlineData(Constants.MarsGravitationalAcceleration)]
+    [InlineData(5.0)]   // Custom
+    public void WeightComponents_45Degrees_AreEqualForAnyGravitationalAcceleration(double g)
     {
-        // At 45, sin = cos, so parallel and perpendicular components should be equal
+        // At 45 deg, sin = cos, so parallel and perpendicular components should always be equal
         double angle = Math.PI / 4.0;
         double mass = 8.0;
 
-        double parallel = Forces.WeightParallel(mass, angle);
-        double perpendicular = Forces.WeightPerpendicular(mass, angle);
+        double parallel = Forces.WeightParallel(mass, angle, g);
+        double perpendicular = Forces.WeightPerpendicular(mass, angle, g);
 
         parallel.Should().BeApproximately(perpendicular, Precision);
     }
 
-    [Fact]
-    public void WeightComponents_Pythagorean_SumOfSquaresEqualsWeightSquared()
+    [Theory]
+    [InlineData(Constants.EarthGravitationalAcceleration)]
+    [InlineData(Constants.MoonGravitationalAcceleration)]
+    [InlineData(Constants.MarsGravitationalAcceleration)]
+    [InlineData(3.0)]   // Custom
+    public void WeightComponents_Pythagorean_SumOfSquaresEqualsWeightSquaredForAnyGravity(double g)
     {
         // W_parallel^2 + W_perp^2 = (m*g)^2
         double mass = 12.0;
         double angle = Math.PI / 6.0;
 
-        double parallel = Forces.WeightParallel(mass, angle);
-        double perpendicular = Forces.WeightPerpendicular(mass, angle);
-        double totalWeight = mass * Constants.EarthGravitationalAcceleration;
+        double parallel = Forces.WeightParallel(mass, angle, g);
+        double perpendicular = Forces.WeightPerpendicular(mass, angle, g);
+        double totalWeight = mass * g;
 
         double sumOfSquares = parallel * parallel + perpendicular * perpendicular;
         sumOfSquares.Should().BeApproximately(totalWeight * totalWeight, Precision);
     }
 
+    [Theory]
+    [InlineData(10.0, Math.PI / 6.0, Constants.EarthGravitationalAcceleration)]
+    [InlineData(10.0, Math.PI / 6.0, Constants.MoonGravitationalAcceleration)]
+    [InlineData(10.0, Math.PI / 6.0, Constants.MarsGravitationalAcceleration)]
+    [InlineData(10.0, Math.PI / 6.0, 0.0)]   // Zero gravity
+    public void WeightParallel_ReturnsExpectedValueAcrossGravitationalAccelerations(double mass, double angle, double g)
+    {
+        double expected = mass * g * Math.Sin(angle);
+        Forces.WeightParallel(mass, angle, g).Should().BeApproximately(expected, Precision);
+    }
+
+    [Theory]
+    [InlineData(10.0, Math.PI / 6.0, Constants.EarthGravitationalAcceleration)]
+    [InlineData(10.0, Math.PI / 6.0, Constants.MoonGravitationalAcceleration)]
+    [InlineData(10.0, Math.PI / 6.0, Constants.MarsGravitationalAcceleration)]
+    [InlineData(10.0, Math.PI / 6.0, 0.0)]   // Zero gravity
+    public void WeightPerpendicular_ReturnsExpectedValueAcrossGravitationalAccelerations(double mass, double angle, double g)
+    {
+        double expected = mass * g * Math.Cos(angle);
+        Forces.WeightPerpendicular(mass, angle, g).Should().BeApproximately(expected, Precision);
+    }
+
+
     [Fact]
     public void WeightParallel_ZeroMass_ReturnsZero()
     {
         Forces.WeightParallel(0.0, Math.PI / 4.0).Should().BeApproximately(0.0, Precision);
+        Forces.WeightParallel(0.0, Math.PI / 4.0, Constants.MoonGravitationalAcceleration).Should().BeApproximately(0.0, Precision);
+        Forces.WeightParallel(0.0, Math.PI / 4.0, Constants.MarsGravitationalAcceleration).Should().BeApproximately(0.0, Precision);
     }
 
     [Fact]
     public void WeightPerpendicular_ZeroMass_ReturnsZero()
     {
         Forces.WeightPerpendicular(0.0, Math.PI / 4.0).Should().BeApproximately(0.0, Precision);
+        Forces.WeightPerpendicular(0.0, Math.PI / 4.0, Constants.MoonGravitationalAcceleration).Should().BeApproximately(0.0, Precision);
+        Forces.WeightPerpendicular(0.0, Math.PI / 4.0, Constants.MarsGravitationalAcceleration).Should().BeApproximately(0.0, Precision);
     }
     #endregion
 

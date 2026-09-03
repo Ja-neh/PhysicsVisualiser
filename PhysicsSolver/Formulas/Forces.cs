@@ -40,14 +40,14 @@ public static class Forces
         return (Constants.UniversalGravitationalConstant * mass) * ( 1 / Math.Pow(radius, 2) );
     }
 
-    public static double WeightParallel(double mass, double angle)
+    public static double WeightParallel(double mass, double angle, double gravitationalAcceleration = Constants.EarthGravitationalAcceleration)
     {
-        return mass * Constants.EarthGravitationalAcceleration * Math.Sin(angle);
+        return mass * gravitationalAcceleration * Math.Sin(angle);
     }
 
-    public static double WeightPerpendicular(double mass, double angle)
+    public static double WeightPerpendicular(double mass, double angle, double gravitationalAcceleration = Constants.EarthGravitationalAcceleration)
     {
-        return mass * Constants.EarthGravitationalAcceleration * Math.Cos(angle);
+        return mass * gravitationalAcceleration * Math.Cos(angle);
     }
 
     public static double ForceAdjacent(double force, double angle)
