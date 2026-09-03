@@ -13,7 +13,8 @@ public record FlatSurfaceState(
     double Acceleration,
     double Normal,
     double Weight,
-    double FrictionCoefficient,
+    double StaticFrictionCoefficient,
+    double KineticFrictionCoefficient,
     double MaxStaticFriction,
     double StaticFriction,
     double KineticFriction,
@@ -45,7 +46,10 @@ public class FlatSurface : Scenario
         private get => box.Mass;
         set
         {
-            box.Mass = value;
+            if (value > 0)
+            {
+                box.Mass = value;
+            }
         }
     }
 
@@ -62,7 +66,7 @@ public class FlatSurface : Scenario
     private double _appliedForce;
     public double AppliedForce
     {
-        get => _appliedForce;
+        private get => _appliedForce;
         set
         {
             _appliedForce = value;
@@ -73,7 +77,7 @@ public class FlatSurface : Scenario
     private double _appliedForceAngle;
     public double AppliedForceAngle
     {
-        get => _appliedForceAngle;
+        private get => _appliedForceAngle;
         set
         {
             _appliedForceAngle = value;
@@ -81,10 +85,33 @@ public class FlatSurface : Scenario
         }
     }
 
+    private double _staticFrictionCoefficient;
+    public double StaticFrictionCoefficient
+    {
+        private get => _staticFrictionCoefficient;
+        set
+        {
+            if(value >= KineticFrictionCoefficient)
+            {
+                _staticFrictionCoefficient = value;
+            }
+        }
+    }
 
-    public double FrictionCoefficient { get; set; }
+    private double _kineticFrictionCoefficient;
+    public double KineticFrictionCoefficient
+    {
+        private get => _kineticFrictionCoefficient;
+        set
+        {
+            if(value <= StaticFrictionCoefficient)
+            {
+                _kineticFrictionCoefficient = value;
+            }
+        }
+    }
 
-    public double Gravity { get; set; } = Constants.EarthGravitationalAcceleration;
+    public double Gravity { private get; set; } = Constants.EarthGravitationalAcceleration;
     #endregion
 
 
@@ -251,8 +278,8 @@ public class FlatSurface : Scenario
         _fNetY.Magnitude = Math.Abs(tempMagnitude);
 
         // friction magnitude
-        _kineticFriction.Magnitude = Forces.Friction(FrictionCoefficient, Normal);
-        _maxStaticFriction.Magnitude = Forces.Friction(FrictionCoefficient, Normal);
+        _kineticFriction.Magnitude = Forces.Friction(KineticFrictionCoefficient, Normal);
+        _maxStaticFriction.Magnitude = Forces.Friction(StaticFrictionCoefficient, Normal);
 
 
         // fNetX, frictions
@@ -344,7 +371,7 @@ public class FlatSurface : Scenario
             }
             else
             {
-                _kineticFriction.Magnitude = Forces.Friction(FrictionCoefficient, Normal);
+                _kineticFriction.Magnitude = Forces.Friction(KineticFrictionCoefficient, Normal);
                 _kineticFriction.Direction = _appliedForceX.Direction.Negate();
 
                 _fNetX.Magnitude = _appliedForceX.SignedMagnitude + _kineticFriction.SignedMagnitude;
@@ -372,7 +399,7 @@ public class FlatSurface : Scenario
     {
         _currentState = new FlatSurfaceState(_totalElapsedTime, 
                                             Mass, Position, Velocity, Acceleration,
-                                            Normal, Weight, FrictionCoefficient,
+                                            Normal, Weight, StaticFrictionCoefficient, KineticFrictionCoefficient,
                                             _maxStaticFriction.SignedMagnitude, _staticFriction.SignedMagnitude ,_kineticFriction.SignedMagnitude,
                                             _appliedForceX.SignedMagnitude, _appliedForceY.SignedMagnitude,
                                             _fNetX.SignedMagnitude, _fNetY.SignedMagnitude);

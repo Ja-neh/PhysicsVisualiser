@@ -248,7 +248,7 @@
                     <BoxView Grid.Row="1" Color="Black" HeightRequest="2" Margin="0, 40, 0, 40"/>
 
                     <!-- inputs -->
-                    <Grid Grid.Row="2" RowDefinitions="*, *, *, *, *, *, *" RowSpacing="10">
+                    <Grid Grid.Row="2" RowDefinitions="*, *, *, *, *, *, *, *" RowSpacing="10">
                         <Label Grid.Row="0" Text="Inputs:" TextColor="Black" FontSize="20" FontAttributes="Bold,Italic" Margin="0, 0, 0, 20"/>
 
                         <!-- Mass -->
@@ -301,9 +301,20 @@
 
                         <!-- Friction Coefficient -->
                         <Grid Grid.Row="5" ColumnDefinitions="*, Auto, Auto" ColumnSpacing="10">
-                            <Label Grid.Column="0" Text="Friction Coefficient" TextColor="Black" FontAttributes="Bold" VerticalTextAlignment="Center" />
+                            <Label Grid.Column="0" Text="Static Friction Coefficient" TextColor="Black" FontAttributes="Bold" VerticalTextAlignment="Center" />
                             <Entry Grid.Column="1" Keyboard="Numeric" 
-                               Text="{Binding UserFrictionCoefficient, StringFormat='{0:F3}'}" HeightRequest="40" WidthRequest="100" 
+                               Text="{Binding UserStaticFrictionCoefficient, StringFormat='{0:F3}'}" HeightRequest="40" WidthRequest="100" 
+                                BackgroundColor="White" TextColor="Black"  />
+                            <Border Grid.Column="2" StrokeShape="RoundRectangle 4" BackgroundColor="Black" Padding="0">
+                                <Label Text="μ" TextColor="White" HeightRequest="40" WidthRequest="45" 
+                           HorizontalTextAlignment="Center" VerticalTextAlignment="Center" />
+                            </Border>
+                        </Grid>
+                        
+                        <Grid Grid.Row="6" ColumnDefinitions="*, Auto, Auto" ColumnSpacing="10">
+                            <Label Grid.Column="0" Text="Kinetic Friction Coefficient" TextColor="Black" FontAttributes="Bold" VerticalTextAlignment="Center" />
+                            <Entry Grid.Column="1" Keyboard="Numeric" 
+                               Text="{Binding UserKineticFrictionCoefficient, StringFormat='{0:F3}'}" HeightRequest="40" WidthRequest="100" 
                                 BackgroundColor="White" TextColor="Black"  />
                             <Border Grid.Column="2" StrokeShape="RoundRectangle 4" BackgroundColor="Black" Padding="0">
                                 <Label Text="μ" TextColor="White" HeightRequest="40" WidthRequest="45" 
@@ -312,7 +323,7 @@
                         </Grid>
 
                         <!-- Gravity -->
-                        <Grid Grid.Row="6" ColumnDefinitions="*, Auto, Auto" ColumnSpacing="10">
+                        <Grid Grid.Row="7" ColumnDefinitions="*, Auto, Auto" ColumnSpacing="10">
                             <Label Grid.Column="0" Text="Gravity" TextColor="Black" FontAttributes="Bold" VerticalTextAlignment="Center" />
                             <Entry Grid.Column="1" Keyboard="Numeric" 
                                Text="{Binding UserGravity, StringFormat='{0:F3}'}" HeightRequest="40" WidthRequest="100" 

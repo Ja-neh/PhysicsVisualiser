@@ -35,7 +35,9 @@ public partial class FlatSurfaceViewModel : ObservableObject
     [ObservableProperty]
     public partial double UserAppliedForceAngle { get; set; }
     [ObservableProperty]
-    public partial double UserFrictionCoefficient { get; set; }
+    public partial double UserStaticFrictionCoefficient { get; set; }
+    [ObservableProperty]
+    public partial double UserKineticFrictionCoefficient { get; set; }
     [ObservableProperty]
     public partial double UserGravity { get; set; }
 
@@ -112,9 +114,14 @@ public partial class FlatSurfaceViewModel : ObservableObject
         _flatScenario.AppliedForceAngle = Conversions.DegreesToRadians(value);
     }
 
-    partial void OnUserFrictionCoefficientChanged(double value)
+    partial void OnUserStaticFrictionCoefficientChanged(double value)
     {
-        _flatScenario.FrictionCoefficient = value;
+        _flatScenario.StaticFrictionCoefficient = value;
+    }
+
+    partial void OnUserKineticFrictionCoefficientChanged(double value)
+    {
+        _flatScenario.KineticFrictionCoefficient = value;
     }
 
     partial void OnUserGravityChanged(double value)
