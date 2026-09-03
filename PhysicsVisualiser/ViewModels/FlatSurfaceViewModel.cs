@@ -27,7 +27,7 @@ public partial class FlatSurfaceViewModel : ObservableObject
 
     // Input properties
     [ObservableProperty]
-    public partial double UserMass { get; set; }
+    public partial double UserMass { get; set; } = 5.0;     // Solver deafults to 5.0 kg, so we want the UI to default to that as well
     [ObservableProperty]
     public partial double UserInitialVelocity { get; set; }
     [ObservableProperty]

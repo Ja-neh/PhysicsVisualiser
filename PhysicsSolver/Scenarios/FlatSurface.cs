@@ -21,7 +21,8 @@ public record FlatSurfaceState(
     double AppliedForceX,
     double AppliedForceY,
     double FNetX,
-    double FNetY
+    double FNetY,
+    bool LiftOffWarning
 
 ) : ScenarioState();
 
@@ -210,10 +211,14 @@ public class FlatSurface : Scenario
 
     private double _firstInitialVelocityForRun;
     private double _segmentStartPosition;
+    private bool _hasliftOffWarning;
     #endregion
 
 
-    public FlatSurface() {}
+    public FlatSurface()
+    {
+        Mass = 5.0;     // default to non zero mass
+    }
 
 
     public void Restart()
@@ -264,6 +269,16 @@ public class FlatSurface : Scenario
 
     public override void Update(double delta)   // using TotalTime instead of small deltas in calculations
     {                                               // to avoid double inaccuracy compounding over time
+
+        if (Math.Abs(Weight) < _appliedForceY.Magnitude && Weight * _appliedForceY.SignedMagnitude < 0)
+        {
+            _hasliftOffWarning = true;
+        }
+        else
+        {
+            _hasliftOffWarning = false;
+        }
+
 
         if(_totalElapsedTime == 0.0)
         {
@@ -414,7 +429,8 @@ public class FlatSurface : Scenario
                                             Normal, Weight, StaticFrictionCoefficient, KineticFrictionCoefficient,
                                             _maxStaticFriction.SignedMagnitude, _staticFriction.SignedMagnitude ,_kineticFriction.SignedMagnitude,
                                             _appliedForceX.SignedMagnitude, _appliedForceY.SignedMagnitude,
-                                            _fNetX.SignedMagnitude, _fNetY.SignedMagnitude);
+                                            _fNetX.SignedMagnitude, _fNetY.SignedMagnitude,
+                                            _hasliftOffWarning );
 
         return _currentState;
     }
