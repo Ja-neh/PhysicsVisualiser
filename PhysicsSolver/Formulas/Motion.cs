@@ -10,7 +10,7 @@ public static class Motion
         return initialVelocity + acceleration * deltaTime;
     }
 
-    public static double FinalVelocitySqured(double initialVelocity, double acceleration, double displacement)
+    public static double FinalVelocitySquared(double initialVelocity, double acceleration, double displacement)
     {
         return initialVelocity * initialVelocity + 2 * acceleration * displacement;
     }
