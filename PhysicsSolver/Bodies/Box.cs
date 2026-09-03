@@ -18,5 +18,4 @@ internal class Box : PhysicsBody
         set { _initialVelocityY = VelocityY = value; }  // update velocity when initial-velocity is changed
     }
 
-    public Box() : base() {}
 }

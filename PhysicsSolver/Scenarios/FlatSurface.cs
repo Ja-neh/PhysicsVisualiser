@@ -156,15 +156,15 @@ public class FlatSurface : Scenario
 
 
     #region FIELDS
-    private readonly Force _appliedForceX = new Force(0, DirectionXY.Xpositive);
-    private readonly Force _appliedForceY = new Force(0, DirectionXY.Ypositive);
+    private readonly Force _appliedForceX = new Force();
+    private readonly Force _appliedForceY = new Force();
 
-    private readonly Force _maxStaticFriction = new Force(0, DirectionXY.Xpositive);
-    private readonly Force _staticFriction = new Force(0, DirectionXY.Xpositive);
-    private readonly Force _kineticFriction = new Force(0, DirectionXY.Xpositive);
+    private readonly Force _maxStaticFriction = new Force();
+    private readonly Force _staticFriction = new Force();
+    private readonly Force _kineticFriction = new Force();
 
-    private readonly Force _fNetX = new Force(0, DirectionXY.Xpositive);
-    private readonly Force _fNetY = new Force(0, DirectionXY.Ypositive);
+    private readonly Force _fNetX = new Force();
+    private readonly Force _fNetY = new Force();
 
     private FlatSurfaceState? _currentState;
 

@@ -14,14 +14,8 @@ internal abstract class PhysicsBody
     public double AccelerationX { get; set; }
     public double AccelerationY { get; set; }
 
-    public Force WeightX { get; set; }
-    public Force WeightY { get; set; }
-    public Force Normal { get; set; }
+    public Force WeightX { get; set; } = new Force(0, DirectionXY.Xnegative);
+    public ForceYNegative WeightY { get; set; } = new ForceYNegative(0);
+    public ForceYPositive Normal { get; set; } = new ForceYPositive(0);
 
-    public PhysicsBody()
-    {
-        WeightX = new Force(0, DirectionXY.Xnegative);
-        WeightY = new Force(0, DirectionXY.Ynegative);
-        Normal = new Force(0, DirectionXY.Ypositive);
-    }
 }
