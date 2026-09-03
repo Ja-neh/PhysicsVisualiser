@@ -352,7 +352,8 @@ public class FlatSurface : Scenario
             Velocity = Motion.FinalVelocity(InitialVelocity, Acceleration, _segmentElapsedTime);
         }    
 
-        if (previousVelocity * Velocity < 0.0)      // segment change
+
+        if (previousVelocity * Velocity <= 0.0 && previousVelocity != 0.0)      // segment change
         {
 
             _kineticFriction.Magnitude = 0.0;
@@ -379,8 +380,11 @@ public class FlatSurface : Scenario
             }
 
             // saving current segment and preparing next
+            double exactStopTime = - InitialVelocity / Acceleration;
+            Position = _segmentStartPosition + Motion.DisplacementUsingAcceleration(InitialVelocity, exactStopTime, Acceleration);
             double finalVelocity = 0.0;
-            FlatSurfaceSegment segment = new FlatSurfaceSegment(_segmentElapsedTime, Position, InitialVelocity, finalVelocity, Acceleration);
+
+            FlatSurfaceSegment segment = new FlatSurfaceSegment(exactStopTime, Position, InitialVelocity, finalVelocity, Acceleration);
             Segments.Add(segment);
 
             if(_fNetX.Magnitude == 0.0)
