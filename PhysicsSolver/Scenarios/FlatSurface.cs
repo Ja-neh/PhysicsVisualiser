@@ -192,6 +192,8 @@ public class FlatSurface : Scenario
 
 
     #region FIELDS
+    private const double _surfaceInclination = 0.0;
+
     private readonly Force _appliedForceX = new Force();
     private readonly Force _appliedForceY = new Force();
 
@@ -204,13 +206,12 @@ public class FlatSurface : Scenario
 
     private FlatSurfaceState? _currentState;
 
-    private const double _surfaceInclination = 0.0;
-
     private double _segmentElapsedTime;
     private double _totalElapsedTime;
 
-    private double _firstInitialVelocityForRun;
+    private double _firstInitialVelocityForCurrentRun;
     private double _segmentStartPosition;
+
     private bool _hasliftOffWarning;
     #endregion
 
@@ -223,19 +224,19 @@ public class FlatSurface : Scenario
 
     public void Restart()
     {
-        _segmentElapsedTime = default;
-        _totalElapsedTime = default;
+        _segmentElapsedTime = 0.0;
+        _totalElapsedTime = 0.0;
 
-        Position = 0.0;
-        _segmentStartPosition = Position;
+        ResetComputedValues();
+    }
 
-        if(InitialVelocity == _firstInitialVelocityForRun)
+    private void ResetComputedValues()
+    {
+        Position = _segmentStartPosition = 0.0;
+
+        if (Segments.Count != 0)
         {
-            InitialVelocity = _firstInitialVelocityForRun;
-        }
-        else if(Segments.Count != 0)
-        {
-            InitialVelocity = _firstInitialVelocityForRun;
+            InitialVelocity = _firstInitialVelocityForCurrentRun;
             Segments.Clear();
         }
         else
@@ -244,182 +245,185 @@ public class FlatSurface : Scenario
         }
 
         Acceleration = 0.0;
+
+        Normal = 0.0;
+
+        _maxStaticFriction.Magnitude = 0.0;
+        _maxStaticFriction.Direction = DirectionXY.Xpositive;
+        _kineticFriction.Magnitude = 0.0;
+        _kineticFriction.Direction = DirectionXY.Xpositive;
+
+        Weight = 0.0;
+
         _fNetX.Magnitude = 0.0;
         _fNetX.Direction = DirectionXY.Xpositive;
         _fNetY.Magnitude = 0.0;
         _fNetY.Direction = DirectionXY.Ypositive;
     }
 
-    public void Reset() // not used
-    {
-        _segmentElapsedTime = default;
-
-        Mass = 0.0;
-
-        double temp = InitialVelocity;
-        Velocity = temp;
-
-        Position = 0.0;
-        Velocity = 0.0;
-        Acceleration = 0.0;
-        Weight = 0.0;
-        Normal = 0.0;
-    }
-
 
     public override void Update(double delta)   // using TotalTime instead of small deltas in calculations
     {                                               // to avoid double inaccuracy compounding over time
 
-        if (Math.Abs(Weight) < _appliedForceY.Magnitude && Weight * _appliedForceY.SignedMagnitude < 0)
-        {
-            _hasliftOffWarning = true;
-        }
-        else
-        {
-            _hasliftOffWarning = false;
-        }
+        if(_totalElapsedTime == 0.0) _firstInitialVelocityForCurrentRun = InitialVelocity;
 
-
-        if(_totalElapsedTime == 0.0)
-        {
-            _firstInitialVelocityForRun = InitialVelocity;
-        }
 
         _segmentElapsedTime += delta;
         _totalElapsedTime += delta;
 
-        // weight & normal
+        ComputeNormalAndWeight();
+
+        _hasliftOffWarning = (Math.Abs(Weight) < _appliedForceY.Magnitude) && (Weight * _appliedForceY.SignedMagnitude < 0);
+        if (_hasliftOffWarning) return;
+
+        ComputeNetForceY();
+        ComputeFrictionMagnitudes();
+        bool moving = ComputeFrictionAndNetForceX();
+
+        double previousVelocity = Velocity;
+
+        if (moving) ComputePosVelAcc();
+
+        if (previousVelocity * Velocity <= 0.0 && previousVelocity != 0.0) HandleSegmentBoundary();
+
+    }
+
+    #region COMPUTATION HELPER FUNCTIONS
+    private void ComputeNormalAndWeight()
+    {
         Weight = Forces.WeightPerpendicular(Mass, _surfaceInclination, Gravity);
         Normal = Weight + _appliedForceY.SignedMagnitude;
+    }
 
-        // fnetY
+    private void ComputeNetForceY()
+    {
         double tempMagnitude = _appliedForceY.SignedMagnitude + Weight + Normal;
         if (tempMagnitude < 0)
         {
             _fNetY.Direction = DirectionXY.Ynegative;
         }
+        else
+        {
+            _fNetY.Direction = DirectionXY.Ypositive;
+        }
         _fNetY.Magnitude = Math.Abs(tempMagnitude);
+    }
 
-        // friction magnitude
-        _kineticFriction.Magnitude = Forces.Friction(KineticFrictionCoefficient, Normal);
+    private void ComputeFrictionMagnitudes()
+    {
         _maxStaticFriction.Magnitude = Forces.Friction(StaticFrictionCoefficient, Normal);
+        _kineticFriction.Magnitude = Forces.Friction(KineticFrictionCoefficient, Normal);
+    }
 
-
-        // fNetX, frictions
-        bool updateAPV = true;
+    private bool ComputeFrictionAndNetForceX()
+    {
         int velocitySign = Math.Sign(Velocity);
-        if(velocitySign != 0)                 // movement
+
+        if (velocitySign != 0)
         {
-            _staticFriction.Magnitude = 0.0;
-            _staticFriction.Direction = DirectionXY.Xpositive;
-
-            if(velocitySign < 0)
-            {
-                _kineticFriction.Direction = DirectionXY.Xpositive;
-            }
-            else
-            {
-                _kineticFriction.Direction = DirectionXY.Xnegative;
-            }
-
-            _fNetX.Magnitude = _appliedForceX.SignedMagnitude + _kineticFriction.SignedMagnitude;
-
-            if (_appliedForceX.Direction == _kineticFriction.Direction)     // appliedForce and friction in same direction
-            {
-                _fNetX.Direction = _appliedForceX.Direction;
-            }
-            else if (_appliedForceX.Magnitude > _kineticFriction.Magnitude)     // opp direction - Fa > fk
-            {
-                _fNetX.Direction = _appliedForceX.Direction;
-            }
-            else if (_appliedForceX.Magnitude < _kineticFriction.Magnitude)     // opp direction - Fa < fk
-            {
-                _fNetX.Direction = _kineticFriction.Direction;
-            }
-        }
-        else if(velocitySign == 0)          // no movement
-        {
-
-            if(_maxStaticFriction.Magnitude >= _appliedForceX.Magnitude)       // fmax >= Fa
-            {
-                _kineticFriction.Magnitude = 0.0;
-                _kineticFriction.Direction = DirectionXY.Xpositive;
-
-                _staticFriction.Magnitude = _appliedForceX.Magnitude;
-                _staticFriction.Direction = _appliedForceX.Direction.Negate();
-
-                _fNetX.Magnitude = 0.0;
-                _fNetX.Direction = DirectionXY.Xpositive;
-                updateAPV = false;
-            }
-            
-            if(_maxStaticFriction.Magnitude < _appliedForceX.Magnitude)      // Fa > fmax
-            {
-                _staticFriction.Magnitude = 0.0;
-                _staticFriction.Direction = DirectionXY.Xpositive;
-
-                _kineticFriction.Direction = _appliedForceX.Direction.Negate();
-
-                _fNetX.Magnitude = _appliedForceX.SignedMagnitude + _kineticFriction.SignedMagnitude;
-                _fNetX.Direction = _appliedForceX.Direction;
-            }
+            ComputeNetForceXWhileMoving(velocitySign);
+            return true;
         }
 
-        // x, v, a
-        double previousVelocity = Velocity;
+        return ComputeNetForceXAtRest();
+    }
 
-        if (updateAPV)
+    private void ComputeNetForceXWhileMoving(int velocitySign)
+    {
+        _staticFriction.Magnitude = 0.0;
+        _staticFriction.Direction = DirectionXY.Xpositive;
+
+        _kineticFriction.Direction = velocitySign < 0 ? DirectionXY.Xpositive : DirectionXY.Xnegative;
+        _fNetX.Magnitude = _appliedForceX.SignedMagnitude + _kineticFriction.SignedMagnitude;
+
+        if (_appliedForceX.Direction == _kineticFriction.Direction)     // appliedForce and friction in same direction
         {
-            Acceleration = _fNetX.SignedMagnitude / Mass;
-            Position = _segmentStartPosition + Motion.DisplacementUsingAcceleration(InitialVelocity, _segmentElapsedTime, Acceleration);
-            Velocity = Motion.FinalVelocity(InitialVelocity, Acceleration, _segmentElapsedTime);
-        }    
-
-
-        if (previousVelocity * Velocity <= 0.0 && previousVelocity != 0.0)      // segment change
+            _fNetX.Direction = _appliedForceX.Direction;
+        }
+        else if (_appliedForceX.Magnitude > _kineticFriction.Magnitude)     // opp direction - Fa > fk
         {
-
-            _kineticFriction.Magnitude = 0.0;
-            _kineticFriction.Direction = DirectionXY.Xpositive;
-
-            _kineticFriction.Magnitude = 0.0;
-            _kineticFriction.Direction = DirectionXY.Xpositive;
-
-            if (_maxStaticFriction.Magnitude >= _appliedForceX.Magnitude)
-            {
-                _staticFriction.Magnitude = _appliedForceX.Magnitude;
-                _staticFriction.Direction = _appliedForceX.Direction.Negate();
-
-                _fNetX.Magnitude = 0.0;
-                _fNetX.Direction = DirectionXY.Xpositive;
-            }
-            else
-            {
-                _kineticFriction.Magnitude = Forces.Friction(KineticFrictionCoefficient, Normal);
-                _kineticFriction.Direction = _appliedForceX.Direction.Negate();
-
-                _fNetX.Magnitude = _appliedForceX.SignedMagnitude + _kineticFriction.SignedMagnitude;
-                _fNetX.Direction = _appliedForceX.Direction;
-            }
-
-            // saving current segment and preparing next
-            double exactStopTime = - InitialVelocity / Acceleration;
-            Position = _segmentStartPosition + Motion.DisplacementUsingAcceleration(InitialVelocity, exactStopTime, Acceleration);
-            double finalVelocity = 0.0;
-
-            FlatSurfaceSegment segment = new FlatSurfaceSegment(exactStopTime, Position, InitialVelocity, finalVelocity, Acceleration);
-            Segments.Add(segment);
-
-            if(_fNetX.Magnitude == 0.0)
-            {
-                Acceleration = 0.0;
-            }
-
-            _segmentElapsedTime = default;
-            _segmentStartPosition = Position;
-            InitialVelocity = 0.0;
+            _fNetX.Direction = _appliedForceX.Direction;
+        }
+        else if (_appliedForceX.Magnitude < _kineticFriction.Magnitude)     // opp direction - Fa < fk
+        {
+            _fNetX.Direction = _kineticFriction.Direction;
         }
     }
+
+    private bool ComputeNetForceXAtRest()
+    {
+        if (_maxStaticFriction.Magnitude >= _appliedForceX.Magnitude)       // fmax >= Fa: stays put
+        {
+            _kineticFriction.Magnitude = 0.0;
+            _kineticFriction.Direction = DirectionXY.Xpositive;
+
+            _staticFriction.Magnitude = _appliedForceX.Magnitude;
+            _staticFriction.Direction = _appliedForceX.Direction.Negate();
+
+            _fNetX.Magnitude = 0.0;
+            _fNetX.Direction = DirectionXY.Xpositive;
+            return false;
+        }
+
+        // fmax < Fa
+        _staticFriction.Magnitude = 0.0;
+        _staticFriction.Direction = DirectionXY.Xpositive;
+
+        _kineticFriction.Direction = _appliedForceX.Direction.Negate();
+
+        _fNetX.Magnitude = _appliedForceX.SignedMagnitude + _kineticFriction.SignedMagnitude;
+        _fNetX.Direction = _appliedForceX.Direction;
+        return true;
+    }
+
+    private void ComputePosVelAcc()
+    {
+        Acceleration = _fNetX.SignedMagnitude / Mass;
+        Position = _segmentStartPosition + Motion.DisplacementUsingAcceleration(InitialVelocity, _segmentElapsedTime, Acceleration);
+        Velocity = Motion.FinalVelocity(InitialVelocity, Acceleration, _segmentElapsedTime);
+    }
+
+    private void HandleSegmentBoundary()
+    {
+
+        if (_maxStaticFriction.Magnitude >= _appliedForceX.Magnitude)
+        {
+            _kineticFriction.Magnitude = 0.0;
+            _kineticFriction.Direction = DirectionXY.Xpositive;
+
+            _staticFriction.Magnitude = _appliedForceX.Magnitude;
+            _staticFriction.Direction = _appliedForceX.Direction.Negate();
+
+            _fNetX.Magnitude = 0.0;
+            _fNetX.Direction = DirectionXY.Xpositive;
+        }
+        else
+        {
+            _kineticFriction.Magnitude = Forces.Friction(KineticFrictionCoefficient, Normal);
+            _kineticFriction.Direction = _appliedForceX.Direction.Negate();
+
+            _fNetX.Magnitude = _appliedForceX.SignedMagnitude + _kineticFriction.SignedMagnitude;
+            _fNetX.Direction = _appliedForceX.Direction;
+        }
+
+        // saving current segment and preparing next
+        double exactStopTime = - InitialVelocity / Acceleration;
+        Position = _segmentStartPosition + Motion.DisplacementUsingAcceleration(InitialVelocity, exactStopTime, Acceleration);
+        
+        double finalVelocity = 0.0;
+        FlatSurfaceSegment segment = new FlatSurfaceSegment(exactStopTime, Position, InitialVelocity, finalVelocity, Acceleration);
+        Segments.Add(segment);
+
+        _segmentElapsedTime = 0.0;
+        _segmentStartPosition = Position;
+        InitialVelocity = 0.0;
+
+        if (_fNetX.Magnitude == 0.0)
+        {
+            Acceleration = 0.0;
+        }
+    }
+    #endregion
 
 
     public FlatSurfaceState GetCurrentState()
@@ -435,3 +439,5 @@ public class FlatSurface : Scenario
         return _currentState;
     }
 }
+
+
