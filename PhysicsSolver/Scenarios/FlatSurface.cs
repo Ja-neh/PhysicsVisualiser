@@ -164,7 +164,7 @@ public class FlatSurface : Scenario
     private readonly Force _kineticFriction = new Force(0, DirectionXY.Xpositive);
 
     private readonly Force _fNetX = new Force(0, DirectionXY.Xpositive);
-    private readonly Force _fNetY = new Force(0, DirectionXY.Xpositive);
+    private readonly Force _fNetY = new Force(0, DirectionXY.Ypositive);
 
     private FlatSurfaceState? _currentState;
 

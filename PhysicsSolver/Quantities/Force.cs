@@ -1,4 +1,4 @@
-﻿namespace PhysicsSolver.Quantities;
+namespace PhysicsSolver.Quantities;
 
 
 internal enum DirectionXY
@@ -21,7 +21,42 @@ internal static class DirectionXYExtensions
     };
 }
 
-internal class Force
+
+#region FORCE INTERFACES AND ABSTRACT CLASS
+internal interface IForce
+{
+    DirectionXY Direction { get; }
+    double Magnitude { get; set; }
+    double SignedMagnitude { get; }
+}
+
+internal interface IMutableDirectionForce : IForce
+{
+    new DirectionXY Direction { get; set; }
+}
+
+internal abstract class ForceBase : IForce
+{
+    private double _magnitude;
+    public double Magnitude
+    {
+        get => _magnitude;
+        set { _magnitude = Math.Abs(value); }
+    }
+
+    public abstract DirectionXY Direction { get; }
+    public abstract double SignedMagnitude { get; }
+
+    public ForceBase(double magnitude)
+    {
+        Magnitude = magnitude;
+    }
+}
+
+#endregion
+
+
+internal class Force : IMutableDirectionForce
 {
     public DirectionXY Direction { get; set; }
 
@@ -38,11 +73,11 @@ internal class Force
         {
             if (Direction == DirectionXY.Xpositive || Direction == DirectionXY.Ypositive)
             {
-                return _magnitude;
+                return Magnitude;
             }
             else
             {
-                return -(_magnitude);
+                return - Magnitude;
             }
         }
     }
@@ -53,9 +88,42 @@ internal class Force
         Magnitude = magnitude;
     }
 
-    public Force()  // Don't forget to set your values later
+    public Force()
     {
         Direction = DirectionXY.Xpositive;
         Magnitude = 0.0;
     }
+}
+
+
+internal class ForceXPositive : ForceBase
+{
+    public override DirectionXY Direction => DirectionXY.Xpositive;
+    public override double SignedMagnitude => Magnitude;
+
+    public ForceXPositive(double magnitude) : base(magnitude) { }
+}
+
+internal class ForceXNegative : ForceBase
+{
+    public override DirectionXY Direction => DirectionXY.Xnegative;
+    public override double SignedMagnitude => - Magnitude;
+
+    public ForceXNegative(double magnitude) : base(magnitude) { }
+}
+
+internal class ForceYPositive : ForceBase
+{
+    public override DirectionXY Direction => DirectionXY.Ypositive;
+    public override double SignedMagnitude => Magnitude;
+
+    public ForceYPositive(double magnitude) : base(magnitude) { }
+}
+
+internal class ForceYNegative : ForceBase
+{
+    public override DirectionXY Direction => DirectionXY.Ynegative;
+    public override double SignedMagnitude => - Magnitude;
+
+    public ForceYNegative(double magnitude) : base(magnitude) { }
 }
