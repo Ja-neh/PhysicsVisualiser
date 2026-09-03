@@ -117,12 +117,10 @@ public partial class FlatSurfaceViewModel : ObservableObject
         _flatScenario.FrictionCoefficient = value;
     }
 
-    // TO DO - uncomment later
-    // SOLVER CURRENTLY NOT SETUP FOR ANY GRAVITY
-    //partial void OnUserGravityChanged(double value)
-    //{
-    //    _flatScenario.Gravity = value;
-    //}
+    partial void OnUserGravityChanged(double value)
+    {
+        _flatScenario.Gravity = value;
+    }
 
     // TO DO
     // "On<...>IsChanging methods" for "User... properties" to check if solver IsRunning
