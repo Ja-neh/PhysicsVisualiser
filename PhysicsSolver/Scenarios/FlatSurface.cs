@@ -137,10 +137,10 @@ public class FlatSurface : Scenario
 
     private double Weight
     {
-        get => box.WeightX.SignedMagnitude;
+        get => box.WeightY.SignedMagnitude;
         set
         {
-            box.WeightX.Magnitude = value;
+            box.WeightY.Magnitude = value;
         }
     }
 
