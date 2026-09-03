@@ -123,11 +123,19 @@ public class FlatSurface : Scenario
         {
             _appliedForceX.Direction = DirectionXY.Xnegative;
         }
+        else
+        {
+            _appliedForceX.Direction = DirectionXY.Xpositive;
+        }
 
         _appliedForceY.Magnitude = Forces.ForceOpposite(AppliedForce, Math.Abs(AppliedForceAngle));
         if (AppliedForceAngle < 0)
         {
             _appliedForceY.Direction = DirectionXY.Ynegative;
+        }
+        else
+        {
+            _appliedForceY.Direction = DirectionXY.Ypositive;
         }
     }
     #endregion
