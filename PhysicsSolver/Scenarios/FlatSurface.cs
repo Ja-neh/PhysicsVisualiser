@@ -239,7 +239,7 @@ public class FlatSurface : Scenario
         _totalElapsedTime += delta;
 
         // weight & normal
-        Weight = Forces.WeightPerpendicular(Mass, _surfaceInclination);
+        Weight = Forces.WeightPerpendicular(Mass, _surfaceInclination, Gravity);
         Normal = Weight + _appliedForceY.SignedMagnitude;
 
         // fnetY
