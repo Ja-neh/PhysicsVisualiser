@@ -27,5 +27,41 @@ public class ConstantsTests
     {
         Assert.Equal(9.8, Constants.EarthGravitationalAcceleration, precision: 1);
     }
+
+    [Fact]
+    public void MoonMass_IsCorrect()
+    {
+        Assert.Equal(7.35e22, Constants.MoonMass, precision: 0);
+    }
+
+    [Fact]
+    public void MoonRadius_IsCorrect()
+    {
+        Assert.Equal(1.74e6, Constants.MoonRadius, precision: 0);
+    }
+
+    [Fact]
+    public void MoonGravitationalAcceleration_IsCorrect()
+    {
+        Assert.Equal(1.62, Constants.MoonGravitationalAcceleration, precision: 2);
+    }
+
+    [Fact]
+    public void MarsMass_IsCorrect()
+    {
+        Assert.Equal(6.42e23, Constants.MarsMass, precision: 0);
+    }
+
+    [Fact]
+    public void MarsRadius_IsCorrect()
+    {
+        Assert.Equal(3.39e6, Constants.MarsRadius, precision: 0);
+    }
+
+    [Fact]
+    public void MarsGravitationalAcceleration_IsCorrect()
+    {
+        Assert.Equal(3.71, Constants.MarsGravitationalAcceleration, precision: 2);
+    }
 }
 
