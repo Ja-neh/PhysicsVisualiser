@@ -86,7 +86,7 @@ $$f_s = -F_{\text{applied}, x}$$
 #### 2. Kinetic Regime ($v \neq 0$ or $|F_{\text{applied}, x}| > f_{s, \max}$):
 Once motion begins, dynamic friction opposes the direction of velocity:
 
-$$f_k = \mu_k \cdot N \cdot (-\operatorname{sgn}(v))$$
+$$f_k = \mu_k \cdot N \cdot (-\text{sgn}(v))$$
 
 Where $\mu_s \ge \mu_k \ge 0$.
 

@@ -81,7 +81,7 @@ When enabled via the UI toggles, force and velocity vectors are drawn from the c
 ### 4.1 Arrow Sizing & Clamping
 Vector lengths are scaled proportionally according to magnitude, bounded by minimum and maximum screen pixel lengths:
 
-$$\text{Length}_{\text{arrow}} = \operatorname{clamp}\left(\frac{\text{Magnitude}}{\text{ScaleFactor}}, \ 25\text{ px}, \ 160\text{ px}\right)$$
+$$\text{Length}_{\text{arrow}} = \text{clamp}\left(\frac{\text{Magnitude}}{\text{ScaleFactor}}, \ 25\text{ px}, \ 160\text{ px}\right)$$
 
 ### 4.2 Trigonometric Arrowhead Generation
 Arrowheads are rendered using standard trigonometric rotations:

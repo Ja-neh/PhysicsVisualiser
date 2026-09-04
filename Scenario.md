@@ -212,5 +212,6 @@ Create a dedicated SkiaSharp renderer implementing `IScenarioRenderer` in [`Phys
 
 - **Flat Surface** (Implemented)
 - **Inclined Plane**
-- **Pulley System** (One body on surface, another hanging from table side, connected by a string)
+- **One body on surface, another hanging from table side, connected by a string**
+- **Pulley System**
 - **Projectile Motion**

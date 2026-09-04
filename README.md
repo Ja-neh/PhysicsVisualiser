@@ -95,7 +95,8 @@ dotnet build -t:Run -f net10.0-windows10.0.19041.0 PhysicsVisualiser/PhysicsVisu
 
 - **Flat Surface** (Implemented)
 - **Inclined Plane**
-- **Pulley System** (One body on surface, another hanging from table side, connected by a string)
+- **One body on surface, another hanging from table side, connected by a string**
+- **Pulley System**
 - **Projectile Motion**
 
 ---
