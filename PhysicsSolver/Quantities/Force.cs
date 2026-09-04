@@ -23,19 +23,21 @@ internal static class DirectionXYExtensions
 
 
 #region FORCE INTERFACES AND ABSTRACT CLASS
-internal interface IForce
+internal interface IMagnitude
 {
-    DirectionXY Direction { get; }
     double Magnitude { get; set; }
     double SignedMagnitude { get; }
 }
-
-internal interface IMutableDirectionForce : IForce
+internal interface IMutableDirection
 {
-    new DirectionXY Direction { get; set; }
+    DirectionXY Direction { get; set; }
+}
+internal interface IImmutableDirection
+{
+    DirectionXY Direction { get; }
 }
 
-internal abstract class ForceBase : IForce
+internal abstract class ForceBase : IMagnitude
 {
     private double _magnitude;
     public double Magnitude
@@ -44,10 +46,9 @@ internal abstract class ForceBase : IForce
         set { _magnitude = Math.Abs(value); }
     }
 
-    public abstract DirectionXY Direction { get; }
     public abstract double SignedMagnitude { get; }
 
-    public ForceBase(double magnitude)
+    protected ForceBase(double magnitude)
     {
         Magnitude = magnitude;
     }
@@ -56,18 +57,11 @@ internal abstract class ForceBase : IForce
 #endregion
 
 
-internal class Force : IMutableDirectionForce
+internal class Force : ForceBase, IMutableDirection
 {
     public DirectionXY Direction { get; set; }
 
-    private double _magnitude;
-    public double Magnitude
-    {
-        get => _magnitude;
-        set { _magnitude = Math.Abs(value); }
-    }
-
-    public double SignedMagnitude
+    public override double SignedMagnitude
     {
         get
         {
@@ -83,46 +77,45 @@ internal class Force : IMutableDirectionForce
     }
 
 
-    public Force(double magnitude, DirectionXY direction){
+    public Force(double magnitude, DirectionXY direction) : base(magnitude)
+    {
         Direction = direction;
-        Magnitude = magnitude;
     }
 
-    public Force()
+    public Force() : base(0.0)
     {
         Direction = DirectionXY.Xpositive;
-        Magnitude = 0.0;
     }
 }
 
 
-internal class ForceXPositive : ForceBase
+internal class ForceXPositive : ForceBase, IImmutableDirection
 {
-    public override DirectionXY Direction => DirectionXY.Xpositive;
+    public DirectionXY Direction => DirectionXY.Xpositive;
     public override double SignedMagnitude => Magnitude;
 
     public ForceXPositive(double magnitude) : base(magnitude) { }
 }
 
-internal class ForceXNegative : ForceBase
+internal class ForceXNegative : ForceBase, IImmutableDirection
 {
-    public override DirectionXY Direction => DirectionXY.Xnegative;
+    public DirectionXY Direction => DirectionXY.Xnegative;
     public override double SignedMagnitude => - Magnitude;
 
     public ForceXNegative(double magnitude) : base(magnitude) { }
 }
 
-internal class ForceYPositive : ForceBase
+internal class ForceYPositive : ForceBase, IImmutableDirection
 {
-    public override DirectionXY Direction => DirectionXY.Ypositive;
+    public DirectionXY Direction => DirectionXY.Ypositive;
     public override double SignedMagnitude => Magnitude;
 
     public ForceYPositive(double magnitude) : base(magnitude) { }
 }
 
-internal class ForceYNegative : ForceBase
+internal class ForceYNegative : ForceBase, IImmutableDirection
 {
-    public override DirectionXY Direction => DirectionXY.Ynegative;
+    public DirectionXY Direction => DirectionXY.Ynegative;
     public override double SignedMagnitude => - Magnitude;
 
     public ForceYNegative(double magnitude) : base(magnitude) { }
