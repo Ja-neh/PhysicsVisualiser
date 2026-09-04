@@ -6,4 +6,9 @@ public static class Conversions
     {
         return angleInDegrees * (Math.PI / 180.0);
     }
+
+    public static double RadiansToDegrees(double angleInRadians)
+    {
+        return angleInRadians * (180.0 / Math.PI);
+    }
 }
