@@ -22,11 +22,8 @@ jobs:
       - name: Install .NET MAUI Workload
         run: dotnet workload install maui
 
-      - name: Restore Dependencies
-        run: dotnet restore PhysicsVisualiser.slnx
-
-      - name: Build Solution
-        run: dotnet build PhysicsVisualiser.slnx -c Release --no-restore
+      - name: Build Windows App
+        run: dotnet build PhysicsVisualiser/PhysicsVisualiser.csproj -f net10.0-windows10.0.19041.0 -c Release
 
       - name: Run Unit Tests
-        run: dotnet test PhysicsSolver.Tests/PhysicsSolver.Tests.csproj -c Release --no-build --verbosity normal
+        run: dotnet test PhysicsSolver.Tests/PhysicsSolver.Tests.csproj -c Release --verbosity normal
