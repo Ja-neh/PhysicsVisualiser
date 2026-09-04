@@ -265,9 +265,11 @@ public class FlatSurface : Scenario
 
         if(_totalElapsedTime == 0.0) _firstInitialVelocityForCurrentRun = InitialVelocity;
 
-
-        _segmentElapsedTime += delta;
-        _totalElapsedTime += delta;
+        if (!_hasliftOffWarning)
+        {
+            _segmentElapsedTime += delta;
+            _totalElapsedTime += delta;
+        }
 
         ComputeNormalAndWeight();
 

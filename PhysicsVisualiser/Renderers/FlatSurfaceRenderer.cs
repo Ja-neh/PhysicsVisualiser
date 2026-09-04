@@ -15,19 +15,21 @@ public class FlatSurfaceRenderer
 
     // FIELDS
     #region COLOURS
-    private static readonly SKColor BgColour = SKColors.White;
-    private static readonly SKColor GridColour = new SKColor(51, 65, 85, 90);
-    private static readonly SKColor AxisColour = new SKColor(100, 116, 139, 140);
+    private static readonly SKColor BgColour = new SKColor(206, 212, 220);          // Muted drafting paper / board (#CED4DC)
+    private static readonly SKColor GridMinorColour = new SKColor(190, 197, 207);   // 1m graph paper line
+    private static readonly SKColor GridMajorColour = new SKColor(160, 170, 184);   // 5m graph paper rule
+    private static readonly SKColor AxisColour = new SKColor(47, 55, 70);           // Crisp dark ink ground axis
+    private static readonly SKColor GridTextColour = new SKColor(68, 79, 96);       // Coordinate numbers
 
-    private static readonly SKColor BoxFillColour = new SKColor(79, 70, 229);
-    private static readonly SKColor BoxStrokeColour = new SKColor(165, 180, 252);
-    private static readonly SKColor BoxTextColour = SKColors.White;
+    private static readonly SKColor BoxFillColour = new SKColor(235, 239, 245);     // Block fill (contrasting light card)
+    private static readonly SKColor BoxStrokeColour = new SKColor(15, 23, 42);      // Crisp black ink outline (2px)
+    private static readonly SKColor BoxTextColour = new SKColor(15, 23, 42);        // Black ink mass text
 
-    private static readonly SKColor ForceAppliedColour = new SKColor(239, 68, 68);
-    private static readonly SKColor ForceNormalColour = new SKColor(14, 165, 233);
-    private static readonly SKColor ForceWeightColour = new SKColor(234, 179, 8);
-    private static readonly SKColor ForceFrictionColour = new SKColor(168, 85, 247);
-    private static readonly SKColor VelocityColour = new SKColor(16, 185, 129);
+    private static readonly SKColor ForceAppliedColour = new SKColor(220, 38, 38);  // Red pen (Fa)
+    private static readonly SKColor ForceNormalColour = new SKColor(2, 132, 199);    // Blue pen (N)
+    private static readonly SKColor ForceWeightColour = new SKColor(180, 83, 9);     // Graphite pen (W)
+    private static readonly SKColor ForceFrictionColour = new SKColor(109, 40, 217); // Violet pen (f)
+    private static readonly SKColor VelocityColour = new SKColor(4, 120, 87);       // Green pen (v)
     #endregion
 
     #region VIEW(CAMERA, BOX) SETUP
@@ -70,18 +72,21 @@ public class FlatSurfaceRenderer
         canvas.Translate( - _cameraPx, 0);
 
         // grid
-        DrawGrid(canvas, xAnchorPx, yAnchorPx, heightPx);
+        DrawGrid(canvas, xAnchorPx, yAnchorPx, widthPx, heightPx);
 
         // box
         float boxPositionXPx = xAnchorPx + boxPositionX * _pixelsPerMeter;
         float boxPositionYPx = yAnchorPx - (_boxHeightPx / 2f);
 
-        DrawBox(canvas, boxPositionXPx, boxPositionYPx, state.Mass);
+        DrawBox(canvas, boxPositionXPx, boxPositionYPx);
 
         // vectors
         if (ShowForceVectors) DrawForceVectors(canvas, boxPositionXPx, boxPositionYPx, state);
         
         if (ShowVelocityVectors) DrawVelocityVectors(canvas, boxPositionXPx, boxPositionYPx, state);
+
+        // mass label on top of vectors so it is never crossed out
+        DrawBoxMassLabel(canvas, boxPositionXPx, boxPositionYPx, state.Mass);
 
         canvas.Restore();
         
@@ -92,15 +97,23 @@ public class FlatSurfaceRenderer
         _cameraPosition = 0f;
     }
 
-    private void DrawGrid(SKCanvas canvas, float originX, float originY, float height)
+    private void DrawGrid(SKCanvas canvas, float originX, float originY, float width, float height)
     {
         canvas.Save();
         canvas.Translate(originX, originY);
 
-        using var gridPaint = new SKPaint
+        using var minorGridPaint = new SKPaint
         {
-            Color = GridColour,
-            StrokeWidth = 1f,
+            Color = GridMinorColour,
+            StrokeWidth = 0.75f,
+            Style = SKPaintStyle.Stroke,
+            IsAntialias = true
+        };
+
+        using var majorGridPaint = new SKPaint
+        {
+            Color = GridMajorColour,
+            StrokeWidth = 1.25f,
             Style = SKPaintStyle.Stroke,
             IsAntialias = true
         };
@@ -108,45 +121,55 @@ public class FlatSurfaceRenderer
         using var axisPaint = new SKPaint
         {
             Color = AxisColour,
-            StrokeWidth = 5f,
+            StrokeWidth = 2.5f,
             Style = SKPaintStyle.Stroke,
             IsAntialias = true
         };
 
         using var textPaint = new SKPaint
         {
-            Color = new SKColor(148, 163, 184, 180),
+            Color = GridTextColour,
             IsAntialias = true
         };
 
-        using var font = new SKFont(SKTypeface.Default, 10f);
+        using var gridBoldTypeface = SKTypeface.FromFamilyName(null, SKFontStyle.Bold);
+        using var font = new SKFont(gridBoldTypeface, 16f);
 
-        // meters
-        float leftLimit = - 100f;
-        float rightLimit = 100f;
-        float gridSpacing = 5f;
+        // Continuous visible meter range relative to camera
+        float visibleLeftM = (_cameraPx - originX) / _pixelsPerMeter;
+        float visibleRightM = (_cameraPx + width - originX) / _pixelsPerMeter;
 
-        for(float gridLine = leftLimit; gridLine <= rightLimit; gridLine += gridSpacing)
+        float startM = MathF.Floor(visibleLeftM - 2f);
+        float endM = MathF.Ceiling(visibleRightM + 2f);
+
+        float upLength = height * _gridOriginAdjustFactorY;
+        float downLength = height * (1 - _gridOriginAdjustFactorY);
+
+        for (float m = startM; m <= endM; m += 1f)
         {
-            float xPx = gridLine * _pixelsPerMeter;
+            float xPx = m * _pixelsPerMeter;
+            bool isMajor = MathF.Abs(m % 5f) < 0.001f;
 
-            float upLength = height * _gridOriginAdjustFactorY;
-            float downLength = height * (1 - _gridOriginAdjustFactorY);
-            canvas.DrawLine(xPx, downLength, xPx, -upLength, gridPaint);
-
-            float rightOfGridLine = xPx + 4f;
-            float belowXAxis = 20f;
-            canvas.DrawText($"{gridLine}m", rightOfGridLine, belowXAxis, SKTextAlign.Left, font, textPaint);
+            if (isMajor)
+            {
+                canvas.DrawLine(xPx, downLength, xPx, -upLength, majorGridPaint);
+                float rightOfGridLine = xPx + 6f;
+                float belowXAxis = 22f;
+                canvas.DrawText($"{m:0}m", rightOfGridLine, belowXAxis, SKTextAlign.Left, font, textPaint);
+            }
+            else
+            {
+                canvas.DrawLine(xPx, downLength, xPx, -upLength, minorGridPaint);
+            }
         }
 
-        canvas.DrawLine(leftLimit * _pixelsPerMeter, 0, rightLimit * _pixelsPerMeter, 0, axisPaint);
+        canvas.DrawLine(startM * _pixelsPerMeter, 0, endM * _pixelsPerMeter, 0, axisPaint);
 
         canvas.Restore();
-
     }
 
 
-    private void DrawBox(SKCanvas canvas, float centerX, float centerY, double mass)
+    private void DrawBox(SKCanvas canvas, float centerX, float centerY)
     {
         canvas.Save();
         canvas.Translate(centerX, centerY);
@@ -166,19 +189,28 @@ public class FlatSurfaceRenderer
             IsAntialias = true
         };
 
+        var rect = new SKRoundRect(new SKRect(-_boxWidthPx / 2f, -_boxHeightPx / 2f, _boxWidthPx / 2f, _boxHeightPx / 2f), 4f, 4f);
+        canvas.DrawRoundRect(rect, boxFill);
+        canvas.DrawRoundRect(rect, boxStroke);
+
+        canvas.Restore();
+    }
+
+    private void DrawBoxMassLabel(SKCanvas canvas, float centerX, float centerY, double mass)
+    {
+        canvas.Save();
+        canvas.Translate(centerX, centerY);
+
         using var textPaint = new SKPaint
         {
             Color = BoxTextColour,
             IsAntialias = true
         };
 
-        using var font = new SKFont(SKTypeface.Default, 12f);
+        using var massBoldTypeface = SKTypeface.FromFamilyName(null, SKFontStyle.Bold);
+        using var font = new SKFont(massBoldTypeface, 15f);
 
-        var rect = new SKRoundRect(new SKRect(-_boxWidthPx / 2f, -_boxHeightPx / 2f, _boxWidthPx / 2f, _boxHeightPx / 2f), 6f, 6f);
-        canvas.DrawRoundRect(rect, boxFill);
-        canvas.DrawRoundRect(rect, boxStroke);
-
-        canvas.DrawText($"{mass:0.0} kg", 0, 4, SKTextAlign.Center, font, textPaint);
+        canvas.DrawText($"{mass:0.0} kg", 0, 5.5f, SKTextAlign.Center, font, textPaint);
 
         canvas.Restore();
     }

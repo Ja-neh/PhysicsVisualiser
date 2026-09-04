@@ -6,6 +6,7 @@ using PhysicsSolver.Scenarios;
 using PhysicsVisualiser.Renderers;
 using System;
 using System.ComponentModel;
+using System.Globalization;
 using System.Runtime.CompilerServices;
 using System.Windows.Input;
 
@@ -25,9 +26,25 @@ public partial class FlatSurfaceViewModel : ObservableObject
     public FlatSurfaceRenderer Renderer { get; } = new FlatSurfaceRenderer();
     public event Action? RequestInvalidateSurface;
 
-    // Input properties
+    // Input string properties for UI data-binding (prevents mid-keystroke reformatting / cursor jumps)
     [ObservableProperty]
-    public partial double UserMass { get; set; } = 5.0;     // Solver deafults to 5.0 kg, so we want the UI to default to that as well
+    public partial string UserMassInput { get; set; } = "5.0";
+    [ObservableProperty]
+    public partial string UserInitialVelocityInput { get; set; } = "0.0";
+    [ObservableProperty]
+    public partial string UserAppliedForceInput { get; set; } = "0.0";
+    [ObservableProperty]
+    public partial string UserAppliedForceAngleInput { get; set; } = "0.0";
+    [ObservableProperty]
+    public partial string UserStaticFrictionCoefficientInput { get; set; } = "0.0";
+    [ObservableProperty]
+    public partial string UserKineticFrictionCoefficientInput { get; set; } = "0.0";
+    [ObservableProperty]
+    public partial string UserGravityInput { get; set; } = "9.8";
+
+    // Underlying double values
+    [ObservableProperty]
+    public partial double UserMass { get; set; } = 5.0;
     [ObservableProperty]
     public partial double UserInitialVelocity { get; set; }
     [ObservableProperty]
@@ -39,7 +56,7 @@ public partial class FlatSurfaceViewModel : ObservableObject
     [ObservableProperty]
     public partial double UserKineticFrictionCoefficient { get; set; }
     [ObservableProperty]
-    public partial double UserGravity { get; set; }
+    public partial double UserGravity { get; set; } = 9.8;
 
     // UI time
     [ObservableProperty]
@@ -70,6 +87,8 @@ public partial class FlatSurfaceViewModel : ObservableObject
     public partial double SolverCurrentNetForceX { get; set; }
     [ObservableProperty]
     public partial double SolverCurrentNetForceY { get; set; }
+    [ObservableProperty]
+    public partial bool SolverLiftOffWarning { get; set; }
 
     // Show toggles
     [ObservableProperty]
@@ -94,6 +113,116 @@ public partial class FlatSurfaceViewModel : ObservableObject
 
 
     #region INPUT TO SOLVER
+    private static bool TryParseDouble(string? text, out double result)
+    {
+        if (string.IsNullOrWhiteSpace(text))
+        {
+            result = 0;
+            return false;
+        }
+
+        string normalized = text.Trim().Replace(',', '.');
+        return double.TryParse(normalized, NumberStyles.Float, CultureInfo.InvariantCulture, out result);
+    }
+
+    partial void OnUserMassInputChanged(string value)
+    {
+        if (TryParseDouble(value, out double val) && val > 0)
+        {
+            UserMass = val;
+            _flatScenario.Mass = val;
+            if (!IsRunning)
+            {
+                SyncViewWithSolver();
+                RequestRepaint();
+            }
+        }
+    }
+
+    partial void OnUserInitialVelocityInputChanged(string value)
+    {
+        if (TryParseDouble(value, out double val))
+        {
+            UserInitialVelocity = val;
+            _flatScenario.InitialVelocity = val;
+            if (!IsRunning)
+            {
+                SyncViewWithSolver();
+                RequestRepaint();
+            }
+        }
+    }
+
+    partial void OnUserAppliedForceInputChanged(string value)
+    {
+        if (TryParseDouble(value, out double val))
+        {
+            UserAppliedForce = val;
+            _flatScenario.AppliedForce = val;
+            if (!IsRunning)
+            {
+                SyncViewWithSolver();
+                RequestRepaint();
+            }
+        }
+    }
+
+    partial void OnUserAppliedForceAngleInputChanged(string value)
+    {
+        if (TryParseDouble(value, out double val))
+        {
+            UserAppliedForceAngle = val;
+            _flatScenario.AppliedForceAngle = Conversions.DegreesToRadians(val);
+            if (!IsRunning)
+            {
+                SyncViewWithSolver();
+                RequestRepaint();
+            }
+        }
+    }
+
+    partial void OnUserStaticFrictionCoefficientInputChanged(string value)
+    {
+        if (TryParseDouble(value, out double val))
+        {
+            UserStaticFrictionCoefficient = val;
+            _flatScenario.StaticFrictionCoefficient = val;
+            if (!IsRunning)
+            {
+                SyncViewWithSolver();
+                RequestRepaint();
+            }
+        }
+    }
+
+    partial void OnUserKineticFrictionCoefficientInputChanged(string value)
+    {
+        if (TryParseDouble(value, out double val))
+        {
+            UserKineticFrictionCoefficient = val;
+            _flatScenario.KineticFrictionCoefficient = val;
+            if (!IsRunning)
+            {
+                SyncViewWithSolver();
+                RequestRepaint();
+            }
+        }
+    }
+
+    partial void OnUserGravityInputChanged(string value)
+    {
+        if (TryParseDouble(value, out double val))
+        {
+            UserGravity = val;
+            _flatScenario.Gravity = val;
+            if (!IsRunning)
+            {
+                SyncViewWithSolver();
+                RequestRepaint();
+            }
+        }
+    }
+
     partial void OnUserMassChanged(double value)
     {
         _flatScenario.Mass = value;
@@ -128,10 +257,6 @@ public partial class FlatSurfaceViewModel : ObservableObject
     {
         _flatScenario.Gravity = value;
     }
-
-    // TO DO
-    // "On<...>IsChanging methods" for "User... properties" to check if solver IsRunning
-    // if running, user be warned of sudden, "maybe" unexpected changes in current run
     #endregion
 
 
@@ -139,9 +264,11 @@ public partial class FlatSurfaceViewModel : ObservableObject
     private IDispatcherTimer? _timer;
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(CanPlay))]
+    [NotifyPropertyChangedFor(nameof(CanPause))]
     [NotifyCanExecuteChangedFor(nameof(PlayCommand))]
     [NotifyCanExecuteChangedFor(nameof(PauseCommand))]
-    private partial bool IsRunning { get; set; }        // defaults to false - want false
+    public partial bool IsRunning { get; set; }        // defaults to false - want false
 
     public bool CanPlay => !IsRunning;
     public bool CanPause => IsRunning;
@@ -210,6 +337,7 @@ public partial class FlatSurfaceViewModel : ObservableObject
 
     public FlatSurfaceViewModel()
     {
+        _flatScenario.Gravity = UserGravity;
         State = _flatScenario.GetCurrentState();
         ShowForceVectors = Renderer.ShowForceVectors;
         ShowVelocityVectors = Renderer.ShowVelocityVectors;
@@ -232,6 +360,7 @@ public partial class FlatSurfaceViewModel : ObservableObject
         SolverCurrentAppliedForceY = State.AppliedForceY;
         SolverCurrentNetForceX = State.FNetX;
         SolverCurrentNetForceY = State.FNetY;
+        SolverLiftOffWarning = State.LiftOffWarning;
     }
 
     public void RequestRepaint()

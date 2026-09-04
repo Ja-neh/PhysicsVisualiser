@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="UTF-8" ?>
+<?xml version="1.0" encoding="UTF-8" ?>
 <ResourceDictionary 
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml">
@@ -41,4 +41,42 @@
     <SolidColorBrush x:Key="Gray600Brush" Color="{StaticResource Gray600}"/>
     <SolidColorBrush x:Key="Gray900Brush" Color="{StaticResource Gray900}"/>
     <SolidColorBrush x:Key="Gray950Brush" Color="{StaticResource Gray950}"/>
+
+    <!-- Dark Board / Chalkboard Laboratory Tokens -->
+    <Color x:Key="DarkBoard">#121214</Color>
+    <Color x:Key="DarkPanel">#1A1A1E</Color>
+    <Color x:Key="DarkBorder">#2E2E36</Color>
+    <Color x:Key="DarkInput">#141416</Color>
+    <Color x:Key="DarkInputBorder">#3F3F48</Color>
+    <Color x:Key="ChalkWhite">#F4F4F5</Color>
+    <Color x:Key="ChalkMuted">#A1A1AA</Color>
+    <Color x:Key="ChalkDim">#71717A</Color>
+    <Color x:Key="BadgeBg">#24242A</Color>
+    <Color x:Key="BadgeBorder">#383842</Color>
+    <Color x:Key="BadgeText">#E4E4E7</Color>
+    <Color x:Key="MarkerRed">#F87171</Color>
+    <Color x:Key="MarkerBlue">#38BDF8</Color>
+    <Color x:Key="MarkerYellow">#FACC15</Color>
+    <Color x:Key="MarkerViolet">#C084FC</Color>
+    <Color x:Key="MarkerGreen">#4ADE80</Color>
+    <Color x:Key="CanvasPaper">#CED4DC</Color>
+
+    <SolidColorBrush x:Key="CanvasPaperBrush" Color="{StaticResource CanvasPaper}"/>
+
+    <SolidColorBrush x:Key="DarkBoardBrush" Color="{StaticResource DarkBoard}"/>
+    <SolidColorBrush x:Key="DarkPanelBrush" Color="{StaticResource DarkPanel}"/>
+    <SolidColorBrush x:Key="DarkBorderBrush" Color="{StaticResource DarkBorder}"/>
+    <SolidColorBrush x:Key="DarkInputBrush" Color="{StaticResource DarkInput}"/>
+    <SolidColorBrush x:Key="DarkInputBorderBrush" Color="{StaticResource DarkInputBorder}"/>
+    <SolidColorBrush x:Key="ChalkWhiteBrush" Color="{StaticResource ChalkWhite}"/>
+    <SolidColorBrush x:Key="ChalkMutedBrush" Color="{StaticResource ChalkMuted}"/>
+    <SolidColorBrush x:Key="ChalkDimBrush" Color="{StaticResource ChalkDim}"/>
+    <SolidColorBrush x:Key="BadgeBgBrush" Color="{StaticResource BadgeBg}"/>
+    <SolidColorBrush x:Key="BadgeBorderBrush" Color="{StaticResource BadgeBorder}"/>
+    <SolidColorBrush x:Key="BadgeTextBrush" Color="{StaticResource BadgeText}"/>
+    <SolidColorBrush x:Key="MarkerRedBrush" Color="{StaticResource MarkerRed}"/>
+    <SolidColorBrush x:Key="MarkerBlueBrush" Color="{StaticResource MarkerBlue}"/>
+    <SolidColorBrush x:Key="MarkerYellowBrush" Color="{StaticResource MarkerYellow}"/>
+    <SolidColorBrush x:Key="MarkerVioletBrush" Color="{StaticResource MarkerViolet}"/>
+    <SolidColorBrush x:Key="MarkerGreenBrush" Color="{StaticResource MarkerGreen}"/>
 </ResourceDictionary>
