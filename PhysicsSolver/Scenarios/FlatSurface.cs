@@ -204,8 +204,6 @@ public class FlatSurface : Scenario
     private readonly Force _fNetX = new Force();
     private readonly Force _fNetY = new Force();
 
-    private FlatSurfaceState? _currentState;
-
     private double _segmentElapsedTime;
     private double _totalElapsedTime;
 
@@ -273,7 +271,9 @@ public class FlatSurface : Scenario
 
         ComputeNormalAndWeight();
 
-        _hasliftOffWarning = (Math.Abs(Weight) < _appliedForceY.Magnitude) && (Weight * _appliedForceY.SignedMagnitude < 0);
+        bool oppositeDirection = Weight * _appliedForceY.SignedMagnitude < 0;
+        bool weightSmaller = Math.Abs(Weight) < _appliedForceY.Magnitude;
+        _hasliftOffWarning = oppositeDirection && weightSmaller;
         if (_hasliftOffWarning) return;
 
         ComputeNetForceY();
@@ -428,15 +428,13 @@ public class FlatSurface : Scenario
 
     public FlatSurfaceState GetCurrentState()
     {
-        _currentState = new FlatSurfaceState(_totalElapsedTime, 
-                                            Mass, Position, Velocity, Acceleration,
-                                            Normal, Weight, StaticFrictionCoefficient, KineticFrictionCoefficient,
-                                            _maxStaticFriction.SignedMagnitude, _staticFriction.SignedMagnitude ,_kineticFriction.SignedMagnitude,
-                                            _appliedForceX.SignedMagnitude, _appliedForceY.SignedMagnitude,
-                                            _fNetX.SignedMagnitude, _fNetY.SignedMagnitude,
-                                            _hasliftOffWarning );
-
-        return _currentState;
+        return new FlatSurfaceState(_totalElapsedTime, 
+                                    Mass, Position, Velocity, Acceleration,
+                                    Normal, Weight, StaticFrictionCoefficient, KineticFrictionCoefficient,
+                                    _maxStaticFriction.SignedMagnitude, _staticFriction.SignedMagnitude ,_kineticFriction.SignedMagnitude,
+                                    _appliedForceX.SignedMagnitude, _appliedForceY.SignedMagnitude,
+                                    _fNetX.SignedMagnitude, _fNetY.SignedMagnitude,
+                                    _hasliftOffWarning );
     }
 }
 
