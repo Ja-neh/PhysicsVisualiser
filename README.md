@@ -6,6 +6,19 @@ A 2D physics simulation and visualization application built with **.NET 10 MAUI*
 
 ---
 
+## Demo
+
+### Zero Initial Velocity , No Applied Force & Friction 
+https://github.com/user-attachments/assets/d5c4d887-1865-4e16-ad8c-b069439e832d
+
+### Applied Force & Friction present with positive Initial Velocity
+https://github.com/user-attachments/assets/f4d2efa8-9df1-4b19-80e0-9dd44aa39edd
+
+### Direction change
+https://github.com/user-attachments/assets/49d2cbbb-2042-4ab6-9796-f07c65ad27b2
+
+---
+
 ## Key Features
 
 - **Physics Simulation**: Calculates motion, forces, static and kinetic friction, and liftoff conditions at 60 FPS.
