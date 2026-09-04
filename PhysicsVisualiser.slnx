@@ -1,4 +1,12 @@
 <Solution>
+  <Folder Name="/Documentation/">
+    <File Path="README.md" />
+    <File Path="Solver.md" />
+    <File Path="Visualiser.md" />
+    <File Path="Rendering.md" />
+    <File Path="Architecture.md" />
+    <File Path="Scenario.md" />
+  </Folder>
   <Project Path="PhysicsSolver.Tests/PhysicsSolver.Tests.csproj" Id="9cc72900-4e56-433c-aeae-6ad96ac3eb09" />
   <Project Path="PhysicsSolver/PhysicsSolver.csproj" />
   <Project Path="PhysicsVisualiser/PhysicsVisualiser.csproj">
