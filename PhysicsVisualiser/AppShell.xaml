@@ -3,12 +3,28 @@
     x:Class="PhysicsVisualiser.AppShell"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-    xmlns:local="clr-namespace:PhysicsVisualiser"
-    Title="PhysicsVisualiser">
+    xmlns:views="clr-namespace:PhysicsVisualiser.Views"
+    Title="Physics Visualiser"
+    BackgroundColor="{StaticResource DarkBoard}"
+    ForegroundColor="{StaticResource ChalkWhite}"
+    TitleColor="{StaticResource ChalkWhite}"
+    Shell.BackgroundColor="{StaticResource DarkBoard}"
+    Shell.ForegroundColor="{StaticResource ChalkWhite}"
+    Shell.TitleColor="{StaticResource ChalkWhite}"
+    Shell.TabBarBackgroundColor="{StaticResource DarkPanel}"
+    Shell.TabBarTitleColor="{StaticResource ChalkWhite}"
+    Shell.TabBarUnselectedColor="{StaticResource ChalkDim}">
 
-    <ShellContent
-        Title="Home"
-        ContentTemplate="{DataTemplate local:MainPage}"
-        Route="MainPage" />
+    <TabBar>
+        <Tab Title="Home" Route="HomePage">
+            <ShellContent Title="Home" ContentTemplate="{DataTemplate views:HomePage}" Route="HomePage" />
+        </Tab>
+        <Tab Title="Flat Surface" Route="FlatSurfacePage">
+            <ShellContent Title="Flat Surface" ContentTemplate="{DataTemplate views:FlatSurfacePage}" Route="FlatSurfacePage" />
+        </Tab>
+        <Tab Title="Inclined Surface" Route="InclinedSurfacePage">
+            <ShellContent Title="Inclined Surface" ContentTemplate="{DataTemplate views:InclinedSurfacePage}" Route="InclinedSurfacePage" />
+        </Tab>
+    </TabBar>
 
 </Shell>

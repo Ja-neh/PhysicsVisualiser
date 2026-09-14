@@ -26,7 +26,8 @@ public record InclinedSurfaceState(
     double AppliedForceY,
     double FNetX,
     double FNetY,
-    bool LiftOffWarning
+    bool LiftOffWarning,
+    double SurfaceInclination = 0.0
 
 ) : ScenarioState();
 
@@ -422,6 +423,7 @@ public class InclinedSurface : Scenario
                                     _maxStaticFriction.SignedMagnitude, _staticFriction.SignedMagnitude, _kineticFriction.SignedMagnitude,
                                     _appliedForceX.SignedMagnitude, _appliedForceY.SignedMagnitude,
                                     _fNetX.SignedMagnitude, _fNetY.SignedMagnitude,
-                                    _hasliftOffWarning);
+                                    _hasliftOffWarning,
+                                    SurfaceInclination);
     }
 }

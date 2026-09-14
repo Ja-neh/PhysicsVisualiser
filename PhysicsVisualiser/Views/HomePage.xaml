@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="PhysicsVisualiser.Views.HomePage"
+             BackgroundColor="{StaticResource DarkBoard}"
+             Title="Home">
+
+    <ScrollView>
+        <VerticalStackLayout Spacing="24" Padding="30, 40" MaximumWidthRequest="800" HorizontalOptions="Center">
+
+            <!-- Title & Subtitle -->
+            <VerticalStackLayout Spacing="6" HorizontalOptions="Center">
+                <Label Text="PHYSICS VISUALISER"
+                       FontSize="26"
+                       FontAttributes="Bold"
+                       TextColor="{StaticResource ChalkWhite}"
+                       HorizontalTextAlignment="Center" />
+                <Label Text="Interactive Classical Mechanics Simulation Laboratory"
+                       FontSize="14"
+                       TextColor="{StaticResource ChalkMuted}"
+                       HorizontalTextAlignment="Center" />
+            </VerticalStackLayout>
+
+            <BoxView Color="{StaticResource DarkBorder}" HeightRequest="1" Margin="0, 8" />
+
+            <!-- Scenario Selection Section -->
+            <VerticalStackLayout Spacing="16">
+                <Label Text="AVAILABLE SCENARIOS"
+                       FontSize="13"
+                       FontAttributes="Bold"
+                       TextColor="{StaticResource ChalkMuted}" />
+
+                <Grid ColumnDefinitions="Auto, Auto" ColumnSpacing="16">
+                    <!-- Flat Surface Option -->
+                    <Border Grid.Column="0"
+                            Stroke="{StaticResource DarkBorder}"
+                            BackgroundColor="{StaticResource DarkPanel}"
+                            StrokeThickness="1"
+                            Padding="20">
+                        <Border.StrokeShape>
+                            <RoundRectangle CornerRadius="6" />
+                        </Border.StrokeShape>
+                        <VerticalStackLayout Spacing="12">
+                            <Label Text="Flat Surface"
+                                   FontSize="18"
+                                   FontAttributes="Bold"
+                                   TextColor="{StaticResource ChalkWhite}" />
+                            <Label Text="Horizontal kinematics"
+                                   FontSize="13"
+                                   TextColor="{StaticResource ChalkMuted}" />
+                            <Button Text="OPEN SCENARIO"
+                                    Clicked="OnFlatSurfaceClicked"
+                                    BackgroundColor="#2E754C"
+                                    TextColor="White"
+                                    FontAttributes="Bold"
+                                    FontSize="12"
+                                    HeightRequest="38"
+                                    CornerRadius="4"
+                                    Margin="0, 8, 0, 0" />
+                        </VerticalStackLayout>
+                    </Border>
+
+                    <!-- Inclined Surface Option -->
+                    <Border Grid.Column="1"
+                            Stroke="{StaticResource DarkBorder}"
+                            BackgroundColor="{StaticResource DarkPanel}"
+                            StrokeThickness="1"
+                            Padding="20">
+                        <Border.StrokeShape>
+                            <RoundRectangle CornerRadius="6" />
+                        </Border.StrokeShape>
+                        <VerticalStackLayout Spacing="12">
+                            <Label Text="Inclined Surface"
+                                   FontSize="18"
+                                   FontAttributes="Bold"
+                                   TextColor="{StaticResource ChalkWhite}" />
+                            <Label Text="Ramp dynamics"
+                                   FontSize="13"
+                                   TextColor="{StaticResource ChalkMuted}" />
+                            <Button Text="OPEN SCENARIO"
+                                    Clicked="OnInclinedSurfaceClicked"
+                                    BackgroundColor="#2E754C"
+                                    TextColor="White"
+                                    FontAttributes="Bold"
+                                    FontSize="12"
+                                    HeightRequest="38"
+                                    CornerRadius="4"
+                                    Margin="0, 8, 0, 0" />
+                        </VerticalStackLayout>
+                    </Border>
+                </Grid>
+            </VerticalStackLayout>
+
+        </VerticalStackLayout>
+    </ScrollView>
+
+</ContentPage>

@@ -3,12 +3,12 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:skia="clr-namespace:SkiaSharp.Views.Maui.Controls;assembly=SkiaSharp.Views.Maui.Controls"
              xmlns:vm="clr-namespace:PhysicsVisualiser.ViewModels"
-             x:Class="PhysicsVisualiser.MainPage"
+             x:Class="PhysicsVisualiser.Views.InclinedSurfacePage"
              BackgroundColor="{StaticResource DarkBoard}"
-             Title="Flat Surface">
+             Title="Inclined Surface">
 
     <ContentPage.BindingContext>
-        <vm:FlatSurfaceViewModel />
+        <vm:InclinedSurfaceViewModel />
     </ContentPage.BindingContext>
 
     <Grid ColumnSpacing="0" ColumnDefinitions="*, 1, *">
@@ -101,7 +101,7 @@
                         </Border.StrokeShape>
                         <Label Text="NOTICE" TextColor="White" FontSize="11" FontAttributes="Bold" />
                     </Border>
-                    <Label Grid.Column="1" Text="LIFTOFF DETECTED: Upward force exceeds weight." 
+                    <Label Grid.Column="1" Text="LIFTOFF DETECTED: Upward force exceeds perpendicular weight." 
                            TextColor="#FECACA" FontSize="12" FontAttributes="Bold" VerticalTextAlignment="Center" />
                 </Grid>
             </Border>
@@ -132,7 +132,7 @@
                         <RoundRectangle CornerRadius="4" />
                     </Border.StrokeShape>
 
-                    <Grid Padding="16, 14" RowDefinitions="Auto, Auto, Auto, Auto, Auto, Auto, Auto, Auto, Auto, Auto, Auto, Auto, Auto, Auto, Auto" RowSpacing="8">
+                    <Grid Padding="16, 14" RowDefinitions="Auto, Auto, Auto, Auto, Auto, Auto, Auto, Auto, Auto, Auto, Auto, Auto, Auto, Auto, Auto, Auto" RowSpacing="8">
                         <!-- Header -->
                         <Grid Grid.Row="0" ColumnDefinitions="Auto, *" Margin="0, 0, 0, 8">
                             <Label Text="OUTPUT" TextColor="{StaticResource ChalkWhite}" FontSize="13" FontAttributes="Bold" VerticalTextAlignment="Center"/>
@@ -140,7 +140,7 @@
                         </Grid>
 
                         <!-- Kinematics Group -->
-                        <!-- PositionX -->
+                        <!-- Position -->
                         <Grid Grid.Row="1" ColumnDefinitions="*, Auto, Auto" ColumnSpacing="10">
                             <Label Grid.Column="0" Text="Position" TextColor="{StaticResource ChalkMuted}" FontAttributes="Bold" FontSize="13" VerticalTextAlignment="Center" />
                             <Label Grid.Column="1" Text="{Binding SolverCurrentPosition, StringFormat='{0:F3}'}" TextColor="{StaticResource ChalkWhite}" 
@@ -151,7 +151,7 @@
                             </Border>
                         </Grid>
 
-                        <!-- VelocityX -->
+                        <!-- Velocity -->
                         <Grid Grid.Row="2" ColumnDefinitions="*, Auto, Auto" ColumnSpacing="10">
                             <Label Grid.Column="0" Text="Velocity" TextColor="{StaticResource ChalkMuted}" FontAttributes="Bold" FontSize="13" VerticalTextAlignment="Center" />
                             <Label Grid.Column="1" Text="{Binding SolverCurrentVelocity, StringFormat='{0:F3}'}" TextColor="{StaticResource ChalkWhite}" 
@@ -162,7 +162,7 @@
                             </Border>
                         </Grid>
 
-                        <!-- AccelerationX -->
+                        <!-- Acceleration -->
                         <Grid Grid.Row="3" ColumnDefinitions="*, Auto, Auto" ColumnSpacing="10">
                             <Label Grid.Column="0" Text="Acceleration" TextColor="{StaticResource ChalkMuted}" FontAttributes="Bold" FontSize="13" VerticalTextAlignment="Center" />
                             <Label Grid.Column="1" Text="{Binding SolverCurrentAcceleration, StringFormat='{0:F3}'}" TextColor="{StaticResource ChalkWhite}" 
@@ -191,27 +191,7 @@
                         <!-- Friction Forces -->
                         <Grid Grid.Row="6" ColumnDefinitions="*, Auto, Auto" ColumnSpacing="10">
                             <Label Grid.Column="0" Text="Max Static Friction" TextColor="{StaticResource ChalkMuted}" FontAttributes="Bold" FontSize="13" VerticalTextAlignment="Center" />
-                            <Label Grid.Column="1" Text="{Binding SolverCurrentMaxStaticFrictionForce, StringFormat='{0:F3}'}" TextColor="{StaticResource ChalkWhite}"
-                                   VerticalTextAlignment="Center" HorizontalTextAlignment="End" WidthRequest="110" FontAttributes="Bold" FontSize="14" />
-                            <Border Grid.Column="2" StrokeShape="RoundRectangle 4" Stroke="{StaticResource BadgeBorder}" BackgroundColor="{StaticResource BadgeBg}" Padding="0">
-                                <Label Text="N" TextColor="{StaticResource BadgeText}" HeightRequest="32" WidthRequest="50" FontSize="12" FontAttributes="Bold"
-                                       HorizontalTextAlignment="Center" VerticalTextAlignment="Center" />
-                            </Border>
-                        </Grid>
-                        
-                        <Grid Grid.Row="7" ColumnDefinitions="*, Auto, Auto" ColumnSpacing="10">
-                            <Label Grid.Column="0" Text="Static Friction" TextColor="{StaticResource ChalkMuted}" FontAttributes="Bold" FontSize="13" VerticalTextAlignment="Center" />
-                            <Label Grid.Column="1" Text="{Binding SolverCurrentStaticFrictionForce, StringFormat='{0:F3}'}" TextColor="{StaticResource ChalkWhite}"
-                                   VerticalTextAlignment="Center" HorizontalTextAlignment="End" WidthRequest="110" FontAttributes="Bold" FontSize="14" />
-                            <Border Grid.Column="2" StrokeShape="RoundRectangle 4" Stroke="{StaticResource BadgeBorder}" BackgroundColor="{StaticResource BadgeBg}" Padding="0">
-                                <Label Text="N" TextColor="{StaticResource BadgeText}" HeightRequest="32" WidthRequest="50" FontSize="12" FontAttributes="Bold"
-                                       HorizontalTextAlignment="Center" VerticalTextAlignment="Center" />
-                            </Border>
-                        </Grid>
-                        
-                        <Grid Grid.Row="8" ColumnDefinitions="*, Auto, Auto" ColumnSpacing="10">
-                            <Label Grid.Column="0" Text="Kinetic Friction" TextColor="{StaticResource ChalkMuted}" FontAttributes="Bold" FontSize="13" VerticalTextAlignment="Center" />
-                            <Label Grid.Column="1" Text="{Binding SolverCurrentKineticFrictionForce, StringFormat='{0:F3}'}" TextColor="{StaticResource ChalkWhite}"
+                            <Label Grid.Column="1" Text="{Binding SolverCurrentMaxStaticFrictionForce, StringFormat='{0:F3}'}" TextColor="{StaticResource ChalkWhite}" 
                                    VerticalTextAlignment="Center" HorizontalTextAlignment="End" WidthRequest="110" FontAttributes="Bold" FontSize="14" />
                             <Border Grid.Column="2" StrokeShape="RoundRectangle 4" Stroke="{StaticResource BadgeBorder}" BackgroundColor="{StaticResource BadgeBg}" Padding="0">
                                 <Label Text="N" TextColor="{StaticResource BadgeText}" HeightRequest="32" WidthRequest="50" FontSize="12" FontAttributes="Bold"
@@ -219,10 +199,40 @@
                             </Border>
                         </Grid>
 
-                        <!-- Weight -->
+                        <Grid Grid.Row="7" ColumnDefinitions="*, Auto, Auto" ColumnSpacing="10">
+                            <Label Grid.Column="0" Text="Static Friction" TextColor="{StaticResource ChalkMuted}" FontAttributes="Bold" FontSize="13" VerticalTextAlignment="Center" />
+                            <Label Grid.Column="1" Text="{Binding SolverCurrentStaticFrictionForce, StringFormat='{0:F3}'}" TextColor="{StaticResource ChalkWhite}" 
+                                   VerticalTextAlignment="Center" HorizontalTextAlignment="End" WidthRequest="110" FontAttributes="Bold" FontSize="14" />
+                            <Border Grid.Column="2" StrokeShape="RoundRectangle 4" Stroke="{StaticResource BadgeBorder}" BackgroundColor="{StaticResource BadgeBg}" Padding="0">
+                                <Label Text="N" TextColor="{StaticResource BadgeText}" HeightRequest="32" WidthRequest="50" FontSize="12" FontAttributes="Bold"
+                                       HorizontalTextAlignment="Center" VerticalTextAlignment="Center" />
+                            </Border>
+                        </Grid>
+
+                        <Grid Grid.Row="8" ColumnDefinitions="*, Auto, Auto" ColumnSpacing="10">
+                            <Label Grid.Column="0" Text="Kinetic Friction" TextColor="{StaticResource ChalkMuted}" FontAttributes="Bold" FontSize="13" VerticalTextAlignment="Center" />
+                            <Label Grid.Column="1" Text="{Binding SolverCurrentKineticFrictionForce, StringFormat='{0:F3}'}" TextColor="{StaticResource ChalkWhite}" 
+                                   VerticalTextAlignment="Center" HorizontalTextAlignment="End" WidthRequest="110" FontAttributes="Bold" FontSize="14" />
+                            <Border Grid.Column="2" StrokeShape="RoundRectangle 4" Stroke="{StaticResource BadgeBorder}" BackgroundColor="{StaticResource BadgeBg}" Padding="0">
+                                <Label Text="N" TextColor="{StaticResource BadgeText}" HeightRequest="32" WidthRequest="50" FontSize="12" FontAttributes="Bold"
+                                       HorizontalTextAlignment="Center" VerticalTextAlignment="Center" />
+                            </Border>
+                        </Grid>
+
+                        <!-- Weight Components on Incline -->
                         <Grid Grid.Row="9" ColumnDefinitions="*, Auto, Auto" ColumnSpacing="10">
-                            <Label Grid.Column="0" Text="Weight (W)" TextColor="{StaticResource ChalkMuted}" FontAttributes="Bold" FontSize="13" VerticalTextAlignment="Center" />
-                            <Label Grid.Column="1" Text="{Binding SolverCurrentWeight, StringFormat='{0:F3}'}" TextColor="{StaticResource ChalkWhite}" 
+                            <Label Grid.Column="0" Text="Weight Parallel (W||)" TextColor="{StaticResource ChalkMuted}" FontAttributes="Bold" FontSize="13" VerticalTextAlignment="Center" />
+                            <Label Grid.Column="1" Text="{Binding SolverCurrentWeightX, StringFormat='{0:F3}'}" TextColor="{StaticResource ChalkWhite}" 
+                                   VerticalTextAlignment="Center" HorizontalTextAlignment="End" WidthRequest="110" FontAttributes="Bold" FontSize="14" />
+                            <Border Grid.Column="2" StrokeShape="RoundRectangle 4" Stroke="{StaticResource BadgeBorder}" BackgroundColor="{StaticResource BadgeBg}" Padding="0">
+                                <Label Text="N" TextColor="{StaticResource BadgeText}" HeightRequest="32" WidthRequest="50" FontSize="12" FontAttributes="Bold"
+                                       HorizontalTextAlignment="Center" VerticalTextAlignment="Center" />
+                            </Border>
+                        </Grid>
+
+                        <Grid Grid.Row="10" ColumnDefinitions="*, Auto, Auto" ColumnSpacing="10">
+                            <Label Grid.Column="0" Text="Weight Perpendicular (W⊥)" TextColor="{StaticResource ChalkMuted}" FontAttributes="Bold" FontSize="13" VerticalTextAlignment="Center" />
+                            <Label Grid.Column="1" Text="{Binding SolverCurrentWeightY, StringFormat='{0:F3}'}" TextColor="{StaticResource ChalkWhite}" 
                                    VerticalTextAlignment="Center" HorizontalTextAlignment="End" WidthRequest="110" FontAttributes="Bold" FontSize="14" />
                             <Border Grid.Column="2" StrokeShape="RoundRectangle 4" Stroke="{StaticResource BadgeBorder}" BackgroundColor="{StaticResource BadgeBg}" Padding="0">
                                 <Label Text="N" TextColor="{StaticResource BadgeText}" HeightRequest="32" WidthRequest="50" FontSize="12" FontAttributes="Bold"
@@ -231,12 +241,12 @@
                         </Grid>
 
                         <!-- Sub-divider: Reactions to Applied & Net -->
-                        <BoxView Grid.Row="10" Color="{StaticResource DarkBorder}" HeightRequest="1" Margin="0, 2" Opacity="0.6"/>
+                        <BoxView Grid.Row="11" Color="{StaticResource DarkBorder}" HeightRequest="1" Margin="0, 2" Opacity="0.6"/>
 
                         <!-- Applied & Net Forces Group -->
                         <!-- Applied ForceX -->
-                        <Grid Grid.Row="11" ColumnDefinitions="*, Auto, Auto" ColumnSpacing="10">
-                            <Label Grid.Column="0" Text="Applied Force X" TextColor="{StaticResource ChalkMuted}" FontAttributes="Bold" FontSize="13" VerticalTextAlignment="Center" />
+                        <Grid Grid.Row="12" ColumnDefinitions="*, Auto, Auto" ColumnSpacing="10">
+                            <Label Grid.Column="0" Text="Applied Force ||" TextColor="{StaticResource ChalkMuted}" FontAttributes="Bold" FontSize="13" VerticalTextAlignment="Center" />
                             <Label Grid.Column="1" Text="{Binding SolverCurrentAppliedForceX, StringFormat='{0:F3}'}" TextColor="{StaticResource ChalkWhite}" 
                                    VerticalTextAlignment="Center" HorizontalTextAlignment="End" WidthRequest="110" FontAttributes="Bold" FontSize="14" />
                             <Border Grid.Column="2" StrokeShape="RoundRectangle 4" Stroke="{StaticResource BadgeBorder}" BackgroundColor="{StaticResource BadgeBg}" Padding="0">
@@ -246,8 +256,8 @@
                         </Grid>
 
                         <!-- Applied ForceY -->
-                        <Grid Grid.Row="12" ColumnDefinitions="*, Auto, Auto" ColumnSpacing="10">
-                            <Label Grid.Column="0" Text="Applied Force Y" TextColor="{StaticResource ChalkMuted}" FontAttributes="Bold" FontSize="13" VerticalTextAlignment="Center" />
+                        <Grid Grid.Row="13" ColumnDefinitions="*, Auto, Auto" ColumnSpacing="10">
+                            <Label Grid.Column="0" Text="Applied Force ⊥" TextColor="{StaticResource ChalkMuted}" FontAttributes="Bold" FontSize="13" VerticalTextAlignment="Center" />
                             <Label Grid.Column="1" Text="{Binding SolverCurrentAppliedForceY, StringFormat='{0:F3}'}" TextColor="{StaticResource ChalkWhite}" 
                                    VerticalTextAlignment="Center" HorizontalTextAlignment="End" WidthRequest="110" FontAttributes="Bold" FontSize="14" />
                             <Border Grid.Column="2" StrokeShape="RoundRectangle 4" Stroke="{StaticResource BadgeBorder}" BackgroundColor="{StaticResource BadgeBg}" Padding="0">
@@ -257,8 +267,8 @@
                         </Grid>
 
                         <!-- Net ForceX -->
-                        <Grid Grid.Row="13" ColumnDefinitions="*, Auto, Auto" ColumnSpacing="10">
-                            <Label Grid.Column="0" Text="Net Force X" TextColor="{StaticResource ChalkMuted}" FontAttributes="Bold" FontSize="13" VerticalTextAlignment="Center" />
+                        <Grid Grid.Row="14" ColumnDefinitions="*, Auto, Auto" ColumnSpacing="10">
+                            <Label Grid.Column="0" Text="Net Force ||" TextColor="{StaticResource ChalkMuted}" FontAttributes="Bold" FontSize="13" VerticalTextAlignment="Center" />
                             <Label Grid.Column="1" Text="{Binding SolverCurrentNetForceX, StringFormat='{0:F3}'}" TextColor="{StaticResource ChalkWhite}" 
                                    VerticalTextAlignment="Center" HorizontalTextAlignment="End" WidthRequest="110" FontAttributes="Bold" FontSize="14" />
                             <Border Grid.Column="2" StrokeShape="RoundRectangle 4" Stroke="{StaticResource BadgeBorder}" BackgroundColor="{StaticResource BadgeBg}" Padding="0">
@@ -268,8 +278,8 @@
                         </Grid>
 
                         <!-- Net ForceY -->
-                        <Grid Grid.Row="14" ColumnDefinitions="*, Auto, Auto" ColumnSpacing="10">
-                            <Label Grid.Column="0" Text="Net Force Y" TextColor="{StaticResource ChalkMuted}" FontAttributes="Bold" FontSize="13" VerticalTextAlignment="Center" />
+                        <Grid Grid.Row="15" ColumnDefinitions="*, Auto, Auto" ColumnSpacing="10">
+                            <Label Grid.Column="0" Text="Net Force ⊥" TextColor="{StaticResource ChalkMuted}" FontAttributes="Bold" FontSize="13" VerticalTextAlignment="Center" />
                             <Label Grid.Column="1" Text="{Binding SolverCurrentNetForceY, StringFormat='{0:F3}'}" TextColor="{StaticResource ChalkWhite}" 
                                    VerticalTextAlignment="Center" HorizontalTextAlignment="End" WidthRequest="110" FontAttributes="Bold" FontSize="14" />
                             <Border Grid.Column="2" StrokeShape="RoundRectangle 4" Stroke="{StaticResource BadgeBorder}" BackgroundColor="{StaticResource BadgeBg}" Padding="0">
@@ -286,7 +296,7 @@
                         <RoundRectangle CornerRadius="4" />
                     </Border.StrokeShape>
 
-                    <Grid Padding="16, 14" RowDefinitions="Auto, Auto, Auto, Auto, Auto, Auto, Auto, Auto, Auto, Auto" RowSpacing="10">
+                    <Grid Padding="16, 14" RowDefinitions="Auto, Auto, Auto, Auto, Auto, Auto, Auto, Auto, Auto, Auto, Auto" RowSpacing="10">
                         <!-- Header -->
                         <Grid Grid.Row="0" ColumnDefinitions="Auto, *" Margin="0, 0, 0, 8">
                             <Label Text="PARAMETERS" TextColor="{StaticResource ChalkWhite}" FontSize="13" FontAttributes="Bold" VerticalTextAlignment="Center"/>
@@ -353,12 +363,25 @@
                             </Border>
                         </Grid>
 
-                        <!-- Sub-divider: Applied Force to Environment -->
+                        <!-- Sub-divider: Applied Force to Surface & Environment -->
                         <BoxView Grid.Row="6" Color="{StaticResource DarkBorder}" HeightRequest="1" Margin="0, 2" Opacity="0.6"/>
 
-                        <!-- Surface & Environment -->
-                        <!-- Static Friction Coefficient -->
+                        <!-- Surface Inclination (Ramp Angle) -->
                         <Grid Grid.Row="7" ColumnDefinitions="*, Auto, Auto" ColumnSpacing="10">
+                            <Label Grid.Column="0" Text="Surface Inclination (θ)" TextColor="{StaticResource ChalkMuted}" FontAttributes="Bold" FontSize="13" VerticalTextAlignment="Center" />
+                            <Border Grid.Column="1" Stroke="{StaticResource DarkInputBorder}" StrokeShape="RoundRectangle 4" BackgroundColor="{StaticResource DarkInput}" Padding="0" HeightRequest="40" WidthRequest="115">
+                                <Entry Keyboard="Numeric" Text="{Binding UserSurfaceInclinationInput}" 
+                                       TextColor="{StaticResource ChalkWhite}" FontSize="14" FontAttributes="Bold"
+                                       HorizontalTextAlignment="End" VerticalTextAlignment="Center" BackgroundColor="Transparent" Margin="8, 0" />
+                            </Border>
+                            <Border Grid.Column="2" StrokeShape="RoundRectangle 4" Stroke="{StaticResource BadgeBorder}" BackgroundColor="{StaticResource BadgeBg}" Padding="0">
+                                <Label Text="°" TextColor="{StaticResource BadgeText}" HeightRequest="40" WidthRequest="50" FontSize="12" FontAttributes="Bold"
+                                       HorizontalTextAlignment="Center" VerticalTextAlignment="Center" />
+                            </Border>
+                        </Grid>
+
+                        <!-- Static Friction Coefficient -->
+                        <Grid Grid.Row="8" ColumnDefinitions="*, Auto, Auto" ColumnSpacing="10">
                             <Label Grid.Column="0" Text="Static Friction Coeff." TextColor="{StaticResource ChalkMuted}" FontAttributes="Bold" FontSize="13" VerticalTextAlignment="Center" />
                             <Border Grid.Column="1" Stroke="{StaticResource DarkInputBorder}" StrokeShape="RoundRectangle 4" BackgroundColor="{StaticResource DarkInput}" Padding="0" HeightRequest="40" WidthRequest="115">
                                 <Entry Keyboard="Numeric" Text="{Binding UserStaticFrictionCoefficientInput}" 
@@ -372,7 +395,7 @@
                         </Grid>
                         
                         <!-- Kinetic Friction Coefficient -->
-                        <Grid Grid.Row="8" ColumnDefinitions="*, Auto, Auto" ColumnSpacing="10">
+                        <Grid Grid.Row="9" ColumnDefinitions="*, Auto, Auto" ColumnSpacing="10">
                             <Label Grid.Column="0" Text="Kinetic Friction Coeff." TextColor="{StaticResource ChalkMuted}" FontAttributes="Bold" FontSize="13" VerticalTextAlignment="Center" />
                             <Border Grid.Column="1" Stroke="{StaticResource DarkInputBorder}" StrokeShape="RoundRectangle 4" BackgroundColor="{StaticResource DarkInput}" Padding="0" HeightRequest="40" WidthRequest="115">
                                 <Entry Keyboard="Numeric" Text="{Binding UserKineticFrictionCoefficientInput}" 
@@ -386,7 +409,7 @@
                         </Grid>
 
                         <!-- Gravity -->
-                        <Grid Grid.Row="9" ColumnDefinitions="*, Auto, Auto" ColumnSpacing="10">
+                        <Grid Grid.Row="10" ColumnDefinitions="*, Auto, Auto" ColumnSpacing="10">
                             <Label Grid.Column="0" Text="Gravity (g)" TextColor="{StaticResource ChalkMuted}" FontAttributes="Bold" FontSize="13" VerticalTextAlignment="Center" />
                             <Border Grid.Column="1" Stroke="{StaticResource DarkInputBorder}" StrokeShape="RoundRectangle 4" BackgroundColor="{StaticResource DarkInput}" Padding="0" HeightRequest="40" WidthRequest="115">
                                 <Entry Keyboard="Numeric" Text="{Binding UserGravityInput}" 
