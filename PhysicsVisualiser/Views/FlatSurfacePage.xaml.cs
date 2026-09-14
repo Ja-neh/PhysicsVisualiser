@@ -1,16 +1,15 @@
 using PhysicsVisualiser.ViewModels;
-using SkiaSharp.Views.Maui;
 using SkiaSharp;
+using SkiaSharp.Views.Maui;
 
 #if ANDROID
 using Android.Content.PM;
 #endif
 
-namespace PhysicsVisualiser;
+namespace PhysicsVisualiser.Views;
 
-public partial class MainPage : ContentPage
+public partial class FlatSurfacePage : ContentPage
 {
-
     private FlatSurfaceViewModel? ViewModel => BindingContext as FlatSurfaceViewModel;
 
     #region ANDROID ROTATE VARIABLES
@@ -19,12 +18,10 @@ public partial class MainPage : ContentPage
 #endif
     #endregion
 
-
-    public MainPage()
+    public FlatSurfacePage()
     {
         InitializeComponent();
     }
-
 
     protected override void OnAppearing()
     {
@@ -58,7 +55,6 @@ public partial class MainPage : ContentPage
             Platform.CurrentActivity.RequestedOrientation = ScreenOrientation.Landscape;
         }
 #endif
-
     }
 
     private void UnlockOrientation()
@@ -69,10 +65,8 @@ public partial class MainPage : ContentPage
             Platform.CurrentActivity.RequestedOrientation = _originalOrientation.Value;
         }
 #endif
-
     }
     #endregion
-
 
     private void OnRequestInvalidateSurface()
     {

@@ -1,0 +1,429 @@
+using PhysicsSolver.Bodies;
+using PhysicsSolver.Formulas;
+using PhysicsSolver.Quantities;
+using System;
+using System.Collections.Generic;
+using System.Globalization;
+using System.Text;
+
+namespace PhysicsSolver.Scenarios;
+
+public record InclinedSurfaceState(
+    double Time,
+    double Mass,
+    double Position,
+    double Velocity,
+    double Acceleration,
+    double Normal,
+    double WeightX,
+    double WeightY,
+    double StaticFrictionCoefficient,
+    double KineticFrictionCoefficient,
+    double MaxStaticFriction,
+    double StaticFriction,
+    double KineticFriction,
+    double AppliedForceX,
+    double AppliedForceY,
+    double FNetX,
+    double FNetY,
+    bool LiftOffWarning,
+    double SurfaceInclination = 0.0
+
+) : ScenarioState();
+
+public record InclinedSurfaceSegment(
+    double ElapsedTime,
+    double StartPosition,
+    double InitialVelocity,
+    double FinalVelocity,
+    double Acceleration
+);
+
+public class InclinedSurface : Scenario
+{
+    private readonly Box box = new Box();
+
+    #region PUBLIC PROPERTIES
+    public List<InclinedSurfaceSegment> Segments { get; private set; } = new();
+
+    public double Mass
+    {
+        private get => box.Mass;
+        set
+        {
+            if (value > 0)
+            {
+                box.Mass = value;
+            }
+        }
+    }
+
+    public double InitialVelocity
+    {
+        private get => box.InitialVelocityX;
+        set
+        {
+            box.InitialVelocityX = value;
+        }
+    }
+
+
+    private double _appliedForce;
+    public double AppliedForce
+    {
+        private get => _appliedForce;
+        set
+        {
+            _appliedForce = value;
+            OnAppliedForceChanges();
+        }
+    }
+
+    private double _appliedForceAngle;
+    public double AppliedForceAngle
+    {
+        private get => _appliedForceAngle;
+        set
+        {
+            _appliedForceAngle = value;
+            OnAppliedForceChanges();
+        }
+    }
+
+    private double _staticFrictionCoefficient;
+    public double StaticFrictionCoefficient
+    {
+        private get => _staticFrictionCoefficient;
+        set
+        {
+            if (value >= KineticFrictionCoefficient)
+            {
+                _staticFrictionCoefficient = value;
+            }
+        }
+    }
+
+    private double _kineticFrictionCoefficient;
+    public double KineticFrictionCoefficient
+    {
+        private get => _kineticFrictionCoefficient;
+        set
+        {
+            if (value <= StaticFrictionCoefficient)
+            {
+                _kineticFrictionCoefficient = value;
+            }
+        }
+    }
+
+    public double SurfaceInclination
+    {
+        private get => _surfaceInclination;
+        set
+        {
+            if (value > -Math.PI / 2.0 && value < Math.PI / 2.0)
+            {
+                _surfaceInclination = value;
+            }
+        }
+    }
+
+    public double Gravity { private get; set; } = Constants.EarthGravitationalAcceleration;
+    #endregion
+
+    #region ON APPLIED FORCE CHANGES
+    private void OnAppliedForceChanges()   // To components 
+    {
+        _appliedForceX.Magnitude = Forces.ForceAdjacent(AppliedForce, Math.Abs(AppliedForceAngle));
+        if (AppliedForce < 0)
+        {
+            _appliedForceX.Direction = DirectionXY.Xnegative;
+        }
+        else
+        {
+            _appliedForceX.Direction = DirectionXY.Xpositive;
+        }
+
+        _appliedForceY.Magnitude = Forces.ForceOpposite(AppliedForce, Math.Abs(AppliedForceAngle));
+        if (AppliedForceAngle < 0)
+        {
+            _appliedForceY.Direction = DirectionXY.Ynegative;
+        }
+        else
+        {
+            _appliedForceY.Direction = DirectionXY.Ypositive;
+        }
+    }
+    #endregion
+
+    #region PRIVATE PROPERTIES
+    // from box properties
+    private double Position
+    {
+        get => box.PositionX;
+        set
+        {
+            box.PositionX = value;
+        }
+    }
+
+    private double Velocity
+    {
+        get => box.VelocityX;
+        set
+        {
+            box.VelocityX = value;
+        }
+    }
+
+    private double Acceleration
+    {
+        get => box.AccelerationX;
+        set
+        {
+            box.AccelerationX = value;
+        }
+    }
+
+    private double Normal
+    {
+        get => box.Normal.SignedMagnitude;
+        set
+        {
+            box.Normal.Magnitude = value;
+        }
+    }
+    #endregion
+
+    #region FIELDS
+    private double _surfaceInclination = Math.PI / 12.0; // 15 degrees
+
+    private readonly Force _appliedForceX = new Force();
+    private readonly Force _appliedForceY = new Force();
+
+    private readonly Force _maxStaticFriction = new Force();
+    private readonly Force _staticFriction = new Force();
+    private readonly Force _kineticFriction = new Force();
+
+    private readonly Force _fNetX = new Force();
+    private readonly Force _fNetY = new Force();
+
+    private double _segmentElapsedTime;
+    private double _totalElapsedTime;
+
+    private double _firstInitialVelocityForCurrentRun;
+    private double _segmentStartPosition;
+
+    private bool _hasliftOffWarning;
+    #endregion
+
+    public InclinedSurface()
+    {
+        Mass = 5.0;
+    }
+
+    public void Restart()
+    {
+        _segmentElapsedTime = 0.0;
+        _totalElapsedTime = 0.0;
+
+        ResetComputedValues();
+    }
+
+    private void ResetComputedValues()
+    {
+        Position = _segmentStartPosition = 0.0;
+
+        if (Segments.Count != 0)
+        {
+            InitialVelocity = _firstInitialVelocityForCurrentRun;
+            Segments.Clear();
+        }
+        else
+        {
+            Velocity = InitialVelocity;
+        }
+
+        Acceleration = 0.0;
+
+        Normal = 0.0;
+
+        _maxStaticFriction.Magnitude = 0.0;
+        _maxStaticFriction.Direction = DirectionXY.Xpositive;
+        _kineticFriction.Magnitude = 0.0;
+        _kineticFriction.Direction = DirectionXY.Xpositive;
+
+        box.WeightX.Magnitude = 0.0;
+        box.WeightX.Direction = DirectionXY.Xpositive;
+
+        box.WeightY.Magnitude = 0.0;
+
+        _fNetX.Magnitude = 0.0;
+        _fNetX.Direction = DirectionXY.Xpositive;
+        _fNetY.Magnitude = 0.0;
+        _fNetY.Direction = DirectionXY.Ypositive;
+    }
+
+    public override void Update(double delta)
+    {
+        if (_totalElapsedTime == 0.0) _firstInitialVelocityForCurrentRun = InitialVelocity;
+
+        if (!_hasliftOffWarning)
+        {
+            _segmentElapsedTime += delta;
+            _totalElapsedTime += delta;
+        }
+
+        ComputeNormalAndWeight();
+
+        bool oppositeDirection = box.WeightY.SignedMagnitude * _appliedForceY.SignedMagnitude < 0;
+        bool weightSmaller = box.WeightY.Magnitude < _appliedForceY.Magnitude;
+        _hasliftOffWarning = oppositeDirection && weightSmaller;
+        if (_hasliftOffWarning) return;
+
+        ComputeNetForceY();
+        ComputeFrictionMagnitudes();
+        bool moving = ComputeFrictionAndNetForceX();
+
+        double previousVelocity = Velocity;
+
+        if (moving) ComputePosVelAcc();
+
+        if (previousVelocity * Velocity <= 0.0 && previousVelocity != 0.0) HandleSegmentBoundary();
+    }
+
+
+    #region COMPUTATION HELPER FUNCTIONS
+    private void ComputeNormalAndWeight()
+    {
+        box.WeightX.Magnitude = Forces.WeightParallel(Mass, SurfaceInclination, Gravity);
+        
+        if(SurfaceInclination > 0.0)
+        {
+            box.WeightX.Direction = DirectionXY.Xnegative;
+        }
+        else
+        {
+            box.WeightX.Direction = DirectionXY.Xpositive;
+        }
+
+        box.WeightY.Magnitude = Forces.WeightPerpendicular(Mass, SurfaceInclination, Gravity);
+
+        Normal = box.WeightY.SignedMagnitude + _appliedForceY.SignedMagnitude;
+    }
+
+    private void ComputeNetForceY()
+    {
+        double tempMagnitude = _appliedForceY.SignedMagnitude + box.WeightY.SignedMagnitude + Normal;
+        if (tempMagnitude < 0)
+        {
+            _fNetY.Direction = DirectionXY.Ynegative;
+        }
+        else
+        {
+            _fNetY.Direction = DirectionXY.Ypositive;
+        }
+        _fNetY.Magnitude = Math.Abs(tempMagnitude);
+    }
+
+    private void ComputeFrictionMagnitudes()
+    {
+        _maxStaticFriction.Magnitude = Forces.Friction(StaticFrictionCoefficient, Normal);
+        _kineticFriction.Magnitude = Forces.Friction(KineticFrictionCoefficient, Normal);
+    }
+
+    private bool ComputeFrictionAndNetForceX()
+    {
+        int velocitySign = Math.Sign(Velocity);
+
+        if (velocitySign != 0)
+        {
+            ComputeNetForceXWhileMoving(velocitySign);
+            return true;
+        }
+
+        return ComputeNetForceXAtRest();
+    }
+
+    private void ComputeNetForceXWhileMoving(int velocitySign)
+    {
+        _staticFriction.Magnitude = 0.0;
+        _staticFriction.Direction = DirectionXY.Xpositive;
+
+        _kineticFriction.Direction = velocitySign < 0 ? DirectionXY.Xpositive : DirectionXY.Xnegative;
+
+        double tempFnetX = _appliedForceX.SignedMagnitude + _kineticFriction.SignedMagnitude + box.WeightX.SignedMagnitude;
+        _fNetX.Magnitude = Math.Abs(tempFnetX);
+        _fNetX.Direction = Math.Sign(tempFnetX) < 0 ? DirectionXY.Xnegative : DirectionXY.Xpositive;
+    }
+
+    private bool ComputeNetForceXAtRest()
+    {
+        double tempFnetX = _appliedForceX.SignedMagnitude + box.WeightX.SignedMagnitude;
+
+        if (_maxStaticFriction.Magnitude >= Math.Abs(tempFnetX))       // fmax >= Fa: stays put
+        {
+            _kineticFriction.Magnitude = 0.0;
+            _kineticFriction.Direction = DirectionXY.Xpositive;
+
+            _staticFriction.Magnitude = Math.Abs(tempFnetX);
+            _staticFriction.Direction = Math.Sign(tempFnetX) > 0 ? DirectionXY.Xnegative : DirectionXY.Xpositive;
+
+            _fNetX.Magnitude = 0.0;
+            _fNetX.Direction = DirectionXY.Xpositive;
+            return false;
+        }
+
+        // fmax < Fa
+        _staticFriction.Magnitude = 0.0;
+        _staticFriction.Direction = DirectionXY.Xpositive;
+
+        _kineticFriction.Direction = Math.Sign(tempFnetX) > 0 ? DirectionXY.Xnegative : DirectionXY.Xpositive;
+
+        _fNetX.Magnitude = tempFnetX + _kineticFriction.SignedMagnitude;
+        _fNetX.Direction = Math.Sign(tempFnetX) < 0 ? DirectionXY.Xnegative : DirectionXY.Xpositive;
+        return true;
+    }
+
+    private void ComputePosVelAcc()
+    {
+        Acceleration = _fNetX.SignedMagnitude / Mass;
+        Position = _segmentStartPosition + Motion.DisplacementUsingAcceleration(InitialVelocity, _segmentElapsedTime, Acceleration);
+        Velocity = Motion.FinalVelocity(InitialVelocity, Acceleration, _segmentElapsedTime);
+    }
+
+    private void HandleSegmentBoundary()
+    {
+        ComputeNetForceXAtRest();
+
+        // saving current segment and preparing next
+        double exactStopTime = -InitialVelocity / Acceleration;
+        Position = _segmentStartPosition + Motion.DisplacementUsingAcceleration(InitialVelocity, exactStopTime, Acceleration);
+
+        double finalVelocity = 0.0;
+        InclinedSurfaceSegment segment = new InclinedSurfaceSegment(exactStopTime, Position, InitialVelocity, finalVelocity, Acceleration);
+        Segments.Add(segment);
+
+        _segmentElapsedTime = 0.0;
+        _segmentStartPosition = Position;
+        InitialVelocity = 0.0;
+
+        if (_fNetX.Magnitude == 0.0)
+        {
+            Acceleration = 0.0;
+        }
+    }
+    #endregion
+
+    public InclinedSurfaceState GetCurrentState()
+    {
+        return new InclinedSurfaceState(_totalElapsedTime,
+                                    Mass, Position, Velocity, Acceleration,
+                                    Normal, box.WeightX.SignedMagnitude, box.WeightY.SignedMagnitude, StaticFrictionCoefficient, KineticFrictionCoefficient,
+                                    _maxStaticFriction.SignedMagnitude, _staticFriction.SignedMagnitude, _kineticFriction.SignedMagnitude,
+                                    _appliedForceX.SignedMagnitude, _appliedForceY.SignedMagnitude,
+                                    _fNetX.SignedMagnitude, _fNetY.SignedMagnitude,
+                                    _hasliftOffWarning,
+                                    SurfaceInclination);
+    }
+}
